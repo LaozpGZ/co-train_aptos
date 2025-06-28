@@ -1,42 +1,53 @@
-> **_NOTE:_** This README is for Wallet Adapter `v3` and up. For Wallet Adapter `v2` refer to [this guide](./READMEV2.md)
+# Aptos Wallet Adapter Demo App
 
-# Aptos Wallet Adapter
+This project is a demo of the Aptos Wallet Selector using [Next.js](https://nextjs.org/) and [shadcn/ui](https://ui.shadcn.com/).
 
-A monorepo modular wallet adapter developed and maintained by Aptos for wallet and dapp builders.
+A live version is hosted at:
+https://aptos-labs.github.io/aptos-wallet-adapter
 
-#### Getting Started
+## Use shadcn/ui wallet selector for your own app
 
-- [Wallet Adapter Docs](https://aptos.dev/en/build/sdks/wallet-adapter)
-- [Example app](https://github.com/aptos-labs/aptos-wallet-adapter/tree/main/apps/nextjs-example)
-- [For Aptos Dapps](https://github.com/aptos-labs/aptos-wallet-adapter/tree/main/packages/wallet-adapter-react)
-- [For Aptos Wallets](https://aptos.dev/en/build/sdks/wallet-adapter/browser-extension-wallets)
-- [Core package](https://github.com/aptos-labs/aptos-wallet-adapter/tree/main/packages/wallet-adapter-core)
-- [Wallet connect UI package](./packages/wallet-adapter-react/READMEV2.md#use-a-ui-package-recommended)
+If you want to add the shadcn/ui Aptos wallet selector to your shadcn-based app, follow these steps:
 
-#### [AIP-62](https://github.com/aptos-foundation/AIPs/blob/main/aips/aip-62.md) Supported wallet
+- Follow the [shadcn/ui installation instructions](https://ui.shadcn.com/docs/installation) if you haven't already configured it in your app.
 
-> **_NOTE:_** These are in alphabetical order, any new wallets must be in alphabetical order
+- Run the following command to install all of the shadcn/ui components that the wallet selector depends on:
 
-- [AptosConnect](https://aptosconnect.app/)
-- [Mizu](https://www.mizu.io/)
-- [MSafe](https://www.npmjs.com/package/@msafe/aptos-wallet-adapter)
-- [Nightly](https://chromewebstore.google.com/detail/nightly/fiikommddbeccaoicoejoniammnalkfa)
-- [OKX](https://www.npmjs.com/package/@okwallet/aptos-wallet-adapter)
-- [Petra](https://chromewebstore.google.com/detail/petra-aptos-wallet/ejjladinnckdgjemekebdpeokbikhfci?hl=en)
-- [Pontem](https://www.npmjs.com/package/@pontem/wallet-adapter-plugin)
-- [RimoSafe](https://chromewebstore.google.com/detail/rimo-safe-wallet/kiicddjcakdmobjkcpppkgcjbpakcagp)
-- T wallet
+```bash
+npx shadcn@latest add button collapsible dialog dropdown-menu toast
+```
 
-#### Develop Locally
+- Copy the [wallet-selector.tsx](./src/components/WalletSelector.tsx) file from this repo to your `src/components/` directory.
 
-You would need `pnpm@9.15.5` in order to bootstrap and test a local copy of this repo.
+- If you have not already configured `AptosWalletAdapterProvider` for your app, you can also copy the [wallet-provider.tsx](./src/components/WalletProvider.tsx) file from this repo. Be sure to install the `@aptos-labs/wallet-adapter-react` package and the wallet adapter plugins for the wallet options you plan to support.
 
-1. Clone the repo with `git clone https://github.com/aptos-labs/aptos-wallet-adapter.git`
-2. On the root folder, run `pnpm install` and `pnpm turbo run build`
-3. On the root folder, run `pnpm turbo run dev` - that would spin up a local server (`https://localhost:3000`) with the `nextjs` demoapp
+- Wrap your app with the `WalletProvider` component. See [layout.tsx](./src/app/layout.tsx) for an example.
 
-Looking how you can contribute? Take a look at our [contribution guide](./CONTRIBUTING.md)
+- Render `<WalletSelector />` in your app where you want to place the "Connect Wallet" button. See [page.tsx](./src/app/page.tsx) as an example.
 
-#### Terms of Use and Privacy Policy
+## Run demo app locally
 
-By accessing or using the wallet adapter, you agree to be bound to the Aptos Labs [Terms of Use](https://aptoslabs.com/terms) and [Privacy Policy](https://aptoslabs.com/privacy).
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [https://localhost:3000](https://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+## Learn more
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+- [shadcn/ui Documentation](https://ui.shadcn.com/docs) - learn about shadcn/ui features and API.
