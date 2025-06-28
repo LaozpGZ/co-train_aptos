@@ -1,0 +1,327 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/cotrain/ui/button"
+import { Brain, Zap, Globe, Users, TrendingUp, Shield, ArrowRight, Play, Star } from "lucide-react"
+
+interface LandingPageProps {
+  onNavigate: (page: string) => void
+  isConnecting?: boolean
+  contributors?: any[]
+  logs?: any
+  currentTime?: string
+}
+
+export function LandingPage({ onNavigate, isConnecting, contributors, logs, currentTime }: LandingPageProps) {
+  const [stats, setStats] = useState({
+    activeNodes: 1247,
+    totalCompute: 89234,
+    modelsTraining: 12,
+    contributors: 5678,
+  })
+
+  useEffect(() => {
+    // Simulate real-time stats updates
+    const interval = setInterval(() => {
+      setStats((prev) => ({
+        activeNodes: prev.activeNodes + Math.floor(Math.random() * 3),
+        totalCompute: prev.totalCompute + Math.floor(Math.random() * 50),
+        modelsTraining: prev.modelsTraining + (Math.random() > 0.8 ? 1 : 0),
+        contributors: prev.contributors + Math.floor(Math.random() * 2),
+      }))
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  const features = [
+    {
+      icon: <Globe className="w-8 h-8" />,
+      title: "Decentralized Network",
+      description: "Contribute compute power from anywhere in the world and earn rewards for your participation.",
+    },
+    {
+      icon: <Brain className="w-8 h-8" />,
+      title: "AI Model Training",
+      description: "Train state-of-the-art AI models collaboratively with the global community.",
+    },
+    {
+      icon: <Shield className="w-8 h-8" />,
+      title: "Secure & Transparent",
+      description: "Blockchain-based verification ensures fair compensation and transparent operations.",
+    },
+    {
+      icon: <Zap className="w-8 h-8" />,
+      title: "High Performance",
+      description: "Optimized distributed training algorithms for maximum efficiency and speed.",
+    },
+    {
+      icon: <Users className="w-8 h-8" />,
+      title: "Community Driven",
+      description: "Join a vibrant community of AI researchers, developers, and compute contributors.",
+    },
+    {
+      icon: <TrendingUp className="w-8 h-8" />,
+      title: "Earn Rewards",
+      description: "Get compensated with tokens, NFTs, and reputation for your valuable contributions.",
+    },
+  ]
+
+  const testimonials = [
+    {
+      name: "Dr. Sarah Chen",
+      role: "AI Researcher",
+      avatar: "/placeholder.svg?height=40&width=40",
+      content:
+        "CoTrain has revolutionized how we approach large-scale AI training. The decentralized approach is brilliant.",
+    },
+    {
+      name: "Marcus Rodriguez",
+      role: "GPU Farm Owner",
+      avatar: "/placeholder.svg?height=40&width=40",
+      content: "I've been contributing compute for 6 months and the rewards have been fantastic. Great platform!",
+    },
+    {
+      name: "Alex Kim",
+      role: "ML Engineer",
+      avatar: "/placeholder.svg?height=40&width=40",
+      content: "The transparency and ease of use make CoTrain the best platform for distributed AI training.",
+    },
+  ]
+
+  const currentProjects = [
+    {
+      name: "LLM Foundation Model",
+      progress: 67,
+      participants: 156,
+      type: "Language Model",
+      status: "active",
+    },
+    {
+      name: "Multimodal Vision-Language",
+      progress: 34,
+      participants: 89,
+      type: "Vision-Language",
+      status: "active",
+    },
+    {
+      name: "Code Generation Model",
+      progress: 12,
+      participants: 234,
+      type: "Code Generation",
+      status: "starting",
+    },
+  ]
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 via-black to-blue-900/20" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32">
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6">
+              <span className="text-white">Decentralized</span>
+              <br />
+              <span className="text-green-400 font-mono">AI Training</span>
+            </h1>
+            <p className="text-xl sm:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+              Join the global network of contributors training the next generation of AI models. Contribute compute,
+              earn rewards, and shape the future of artificial intelligence.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button
+                onClick={() => onNavigate("terminal")}
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold"
+                size="lg"
+              >
+                Launch Terminal
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button
+                onClick={() => onNavigate("training")}
+                variant="outline"
+                className="border-green-400 text-green-400 hover:bg-green-400 hover:text-black px-8 py-4 text-lg"
+                size="lg"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                View Training
+              </Button>
+            </div>
+          </div>
+
+          {/* Live Stats */}
+          <div className="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-green-400 mb-2">
+                {stats.activeNodes.toLocaleString()}
+              </div>
+              <div className="text-gray-400">Active Nodes</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-blue-400 mb-2">
+                {stats.totalCompute.toLocaleString()}h
+              </div>
+              <div className="text-gray-400">Compute Hours</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-2">{stats.modelsTraining}</div>
+              <div className="text-gray-400">Models Training</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-purple-400 mb-2">
+                {stats.contributors.toLocaleString()}
+              </div>
+              <div className="text-gray-400">Contributors</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-gray-900/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Why Choose CoTrain?</h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              Experience the future of AI training with our cutting-edge decentralized platform
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="bg-gray-800/50 border border-gray-700 rounded-lg p-6 hover:border-green-400/50 transition-all duration-300"
+              >
+                <div className="text-green-400 mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
+                <p className="text-gray-400">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Current Projects */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Active Training Projects</h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              Join ongoing AI model training projects and contribute to cutting-edge research
+            </p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {currentProjects.map((project, index) => (
+              <div
+                key={index}
+                className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-600 transition-all"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm text-gray-400">{project.type}</span>
+                  <span
+                    className={`px-2 py-1 text-xs rounded ${
+                      project.status === "active" ? "bg-green-900 text-green-400" : "bg-yellow-900 text-yellow-400"
+                    }`}
+                  >
+                    {project.status.toUpperCase()}
+                  </span>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-3">{project.name}</h3>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-sm text-gray-400 mb-1">
+                      <span>Progress</span>
+                      <span>{project.progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-800 h-2 rounded-full">
+                      <div
+                        className="bg-green-400 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${project.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">Participants</span>
+                    <span className="text-green-400">{project.participants}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <Button
+              onClick={() => onNavigate("training")}
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-3"
+            >
+              View All Projects
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-20 bg-gray-900/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">What Our Community Says</h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              Hear from researchers, developers, and contributors who are building the future with CoTrain
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+                <div className="flex items-center mb-4">
+                  <img
+                    src={testimonial.avatar || "/placeholder.svg"}
+                    alt={testimonial.name}
+                    className="w-10 h-10 rounded-full mr-3"
+                  />
+                  <div>
+                    <div className="font-semibold text-white">{testimonial.name}</div>
+                    <div className="text-sm text-gray-400">{testimonial.role}</div>
+                  </div>
+                </div>
+                <p className="text-gray-300 italic">"{testimonial.content}"</p>
+                <div className="flex mt-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">Ready to Start Contributing?</h2>
+          <p className="text-xl text-gray-400 mb-8">
+            Join thousands of contributors and start earning rewards while training the next generation of AI models.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              onClick={() => onNavigate("terminal")}
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg"
+              size="lg"
+            >
+              Get Started Now
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+            <Button
+              variant="outline"
+              className="border-gray-600 text-gray-300 hover:bg-gray-700 px-8 py-4 text-lg bg-transparent"
+              size="lg"
+            >
+              Read Documentation
+            </Button>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
