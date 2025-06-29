@@ -340,17 +340,5 @@ export const isProduction = (): boolean => getConfig().env === 'production';
 export const isTest = (): boolean => getConfig().env === 'test';
 export const isStaging = (): boolean => getConfig().env === 'staging';
 
-// Export types
-export type {
-  Environment,
-  DatabaseConfig,
-  RedisConfig,
-  JwtConfig,
-  AptosConfig,
-  CorsConfig,
-  RateLimitConfig,
-  FileUploadConfig,
-  EmailConfig,
-  WebSocketConfig,
-  AppConfig,
-};
+// Types are already exported as interfaces above
+// No need to re-export them here

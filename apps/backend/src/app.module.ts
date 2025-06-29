@@ -17,11 +17,11 @@ import { UsersModule } from './modules/users/users.module';
 import { TrainingModule } from './modules/training/training.module';
 import { ContributorsModule } from './modules/contributors/contributors.module';
 import { BlockchainModule } from './modules/blockchain/blockchain.module';
+import { WebSocketModule } from './modules/websocket/websocket.module';
 // import { ComputeModule } from './modules/compute/compute.module';
 // import { AnalyticsModule } from './modules/analytics/analytics.module';
 // import { NotificationsModule } from './modules/notifications/notifications.module';
 // import { FilesModule } from './modules/files/files.module';
-// import { WebsocketModule } from './modules/websocket/websocket.module';
 
 // Common
 import { AppController } from './app.controller';
@@ -68,11 +68,11 @@ import { AppService } from './app.service';
     TrainingModule,
     ContributorsModule,
     BlockchainModule,
+    WebSocketModule,
     // ComputeModule,
     // AnalyticsModule,
     // NotificationsModule,
     // FilesModule,
-    // WebsocketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

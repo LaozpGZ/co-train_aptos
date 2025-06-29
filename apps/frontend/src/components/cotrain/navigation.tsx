@@ -4,6 +4,9 @@ import { useState } from "react"
 import { Button } from "@/components/cotrain/ui/button"
 import { Menu, X, Github, Twitter, DiscIcon as Discord, TextIcon as Telegram, Cpu } from "lucide-react"
 import Link from "next/link"
+import { NotificationBell } from "@/components/ui/notification-center"
+import { HelpButton } from "@/components/ui/user-guide"
+import { useAppContext } from "@/contexts/AppContext"
 
 interface NavigationProps {
   currentPage: string
@@ -12,14 +15,15 @@ interface NavigationProps {
 
 export function Navigation({ currentPage, onPageChange }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { startGuide, guides } = useAppContext()
 
   const navItems = [
     { id: "home", label: "Home", href: "/" },
     { id: "terminal", label: "Terminal", href: "/terminal" },
     { id: "training", label: "Training", href: "/training" },
+    { id: "rewards", label: "Rewards", href: "/rewards" },
     { id: "history", label: "History", href: "/history" },
     { id: "docs", label: "Docs", href: "/docs" },
-    { id: "community", label: "Community", href: "/community" },
   ]
 
   const externalLinks = [
@@ -79,6 +83,12 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
                 {link.label}
               </Link>
             ))}
+          </div>
+
+          {/* Notifications & Help */}
+          <div className="hidden md:flex items-center space-x-2">
+            <NotificationBell />
+            <HelpButton onClick={() => startGuide(guides.wallet)} />
           </div>
 
           {/* Social Links & CTA */}

@@ -9,6 +9,8 @@ import { SessionDetails, ParticipantInfo, GlobalStats } from './interfaces/contr
 import { getContractAddress, getNetworkConfig, CONTRACT_FUNCTIONS, CONTRACT_RESOURCES, OCTAS_PER_APT } from './constants/contract-addresses';
 import { createSuccessResponse, createFailureResponse, executeWithRetry } from './utils/transaction-helper';
 import { isValidAptosAddress, normalizeAptosAddress } from './utils/address-validator';
+import { TransactionManagerService } from './services/transaction-manager.service';
+import { TransactionType } from './entities/transaction.entity';
 
 @Injectable()
 export class BlockchainService implements OnModuleInit {
@@ -18,7 +20,10 @@ export class BlockchainService implements OnModuleInit {
   private adminAccount: Account;
   private network: Network;
 
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private transactionManager: TransactionManagerService,
+  ) {}
 
   /**
    * Initialize the service when module starts
@@ -61,7 +66,7 @@ export class BlockchainService implements OnModuleInit {
   /**
    * Create a new training session on the blockchain
    */
-  async createSession(params: CreateSessionDto): Promise<TransactionResponse> {
+  async createSession(params: CreateSessionDto & { userId: string; trainingSessionId?: string }): Promise<TransactionResponse> {
     try {
       this.logger.log(`Creating training session: ${params.name}`);
       
@@ -75,10 +80,29 @@ export class BlockchainService implements OnModuleInit {
         throw new Error('Invalid session parameters');
       }
 
+      // Create transaction record first
+      const transaction = await this.transactionManager.createTransaction({
+        userId: params.userId,
+        type: TransactionType.CREATE_SESSION,
+        payload: {
+          function: `${this.contractAddress}::training_rewards::${CONTRACT_FUNCTIONS.CREATE_SESSION}`,
+          arguments: [
+            params.name,
+            params.rewardAmount,
+            params.maxParticipants,
+            params.description || '',
+            params.duration || 0,
+          ],
+        },
+        trainingSessionId: params.trainingSessionId,
+        amount: params.rewardAmount.toString(),
+        fromAddress: this.adminAccount.accountAddress.toString(),
+      });
+
       // Execute with retry logic
       return await executeWithRetry(async () => {
         // Build transaction
-        const transaction = await this.aptos.transaction.build.simple({
+        const aptosTransaction = await this.aptos.transaction.build.simple({
           sender: this.adminAccount.accountAddress,
           data: {
             function: `${this.contractAddress}::training_rewards::${CONTRACT_FUNCTIONS.CREATE_SESSION}`,
@@ -95,13 +119,11 @@ export class BlockchainService implements OnModuleInit {
         // Sign and submit transaction
         const committedTransaction = await this.aptos.signAndSubmitTransaction({
           signer: this.adminAccount,
-          transaction,
+          transaction: aptosTransaction,
         });
         
-        // Wait for transaction confirmation
-        const executedTransaction = await this.aptos.waitForTransaction({
-          transactionHash: committedTransaction.hash,
-        });
+        // Update transaction record with hash
+        await this.transactionManager.submitTransaction(transaction.id, committedTransaction.hash);
         
         this.logger.log(`Training session created successfully: ${committedTransaction.hash}`);
         
@@ -110,7 +132,7 @@ export class BlockchainService implements OnModuleInit {
           'Training session created successfully',
           { 
             sessionId: committedTransaction.hash,
-            gasUsed: executedTransaction.gas_used,
+            transactionId: transaction.id,
           }
         );
       });

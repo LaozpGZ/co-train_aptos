@@ -175,8 +175,8 @@ export const utils = {
   
   retry: async <T>(
     fn: () => Promise<T>,
-    attempts = CONSTANTS.RETRY_ATTEMPTS,
-    delay = 1000
+    attempts: number = CONSTANTS.RETRY_ATTEMPTS,
+    delay: number = 1000
   ): Promise<T> => {
     try {
       return await fn();
