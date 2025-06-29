@@ -50,7 +50,12 @@ export function HistoryPage({
   const defaultGetTotalStats = () => ({
     totalSessions: userTrainingHistory.length,
     completedSessions: userTrainingHistory.filter(h => h.status === 'completed').length,
-    totalRewards: userTrainingHistory.reduce((sum, h) => sum + (h.reward || 0), 0)
+    totalRewards: userTrainingHistory.reduce((sum, h) => sum + (h.reward || 0), 0),
+    totalComputeHours: userTrainingHistory.reduce((sum, h) => sum + (h.computeHours || 0), 0),
+    totalTokens: userTrainingHistory.reduce((sum, h) => sum + (h.tokens || 0), 0),
+    totalReputation: userTrainingHistory.reduce((sum, h) => sum + (h.reputation || 0), 0),
+    completedProjects: userTrainingHistory.filter(h => h.status === 'completed').length,
+    totalNFTs: userTrainingHistory.reduce((sum, h) => sum + (h.nfts || 0), 0)
   })
   
   // Use provided functions or defaults

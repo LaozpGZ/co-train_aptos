@@ -19,6 +19,11 @@ export function Navigation({ className, currentPage, setCurrentPage }: Navigatio
 
   const navItems = [
     { id: "home", label: "Home", href: "/" },
+    { id: "training", label: "Training", href: "/training" },
+    { id: "terminal", label: "Terminal", href: "/terminal" },
+    { id: "history", label: "History", href: "/history" },
+    { id: "docs", label: "Docs", href: "/docs" },
+    { id: "about", label: "About", href: "/about" },
     { id: "demo", label: "Tech Demo", href: "/demo" },
   ];
 

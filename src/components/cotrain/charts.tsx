@@ -15,7 +15,7 @@ interface ContributionTrendsProps {
   data: ChartData[]
 }
 
-export function ContributionTrends({ data }: ContributionTrendsProps) {
+function ContributionTrends({ data }: ContributionTrendsProps) {
   const [activeChart, setActiveChart] = useState<"compute" | "tokens" | "reputation" | "rank">("compute")
 
   const maxValues = {
@@ -309,7 +309,7 @@ interface PerformanceMetricsProps {
   }[]
 }
 
-export function PerformanceMetrics({ data }: PerformanceMetricsProps) {
+function PerformanceMetrics({ data }: PerformanceMetricsProps) {
   const maxEfficiency = Math.max(...data.map((d) => d.efficiency))
   const avgRank = data.reduce((sum, d) => sum + d.rank, 0) / data.length
 
@@ -402,7 +402,7 @@ interface MonthlyStatsProps {
   }[]
 }
 
-export function MonthlyStats({ data }: MonthlyStatsProps) {
+function MonthlyStats({ data }: MonthlyStatsProps) {
   const maxHours = Math.max(...data.map((d) => d.computeHours))
   const maxTokens = Math.max(...data.map((d) => d.tokensEarned))
 
@@ -460,3 +460,6 @@ export function MonthlyStats({ data }: MonthlyStatsProps) {
     </div>
   )
 }
+
+// Export all components
+export { ContributionTrends, PerformanceMetrics, MonthlyStats }
