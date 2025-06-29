@@ -10,7 +10,7 @@ import { Inter as FontSans } from "next/font/google";
 import { PropsWithChildren } from "react";
 import { AutoConnectProvider } from "@/components/AutoConnectProvider";
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
-import { Navigation } from "@/components/Navigation";
+import { ConditionalNavigation } from "@/components/ConditionalNavigation";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -42,7 +42,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
             <ReactQueryClientProvider>
               <WalletProvider>
                 <div className="min-h-screen flex flex-col">
-                  <Navigation />
+                  <ConditionalNavigation />
                   <main className="flex-1">
                     {children}
                   </main>

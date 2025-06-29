@@ -51,3 +51,22 @@ To learn more about Next.js, take a look at the following resources:
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 - [shadcn/ui Documentation](https://ui.shadcn.com/docs) - learn about shadcn/ui features and API.
+
+## Deployment
+
+### Deploy on Vercel
+
+This project is optimized for deployment on [Vercel](https://vercel.com/).
+
+To deploy your own version:
+
+1. Push your code to a Git repository (GitHub, GitLab, Bitbucket)
+2. Import your project on Vercel
+3. Configure environment variables as specified in `.env.example`
+4. Deploy!
+
+For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+### Environment Variables
+
+This project uses several environment variables for configuration. See `.env.example` for a list of required and optional variables.

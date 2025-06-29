@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "clean": "turbo run clean && rm -rf node_modules",
-    "format": "prettier --write './**/*.{ts,tsx,js,jsx,json,md,html,css}'"
+    "format": "prettier --write './**/*.{ts,tsx,js,jsx,json,md,html,css}'",
+    "deploy:prebuild": "./scripts/deploy-with-build.sh",
+    "build:clean": "rm -rf .next && pnpm run build"
   },
   "dependencies": {
     "@aptos-labs/derived-wallet-ethereum": "0.3.0",
