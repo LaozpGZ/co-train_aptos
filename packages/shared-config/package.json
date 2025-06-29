@@ -1,0 +1,22 @@
+{
+  "name": "@cotrain/shared-config",
+  "version": "1.0.0",
+  "description": "Shared configuration for CoTrain platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@cotrain/shared-types": "workspace:*",
+    "@cotrain/shared-utils": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.3"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

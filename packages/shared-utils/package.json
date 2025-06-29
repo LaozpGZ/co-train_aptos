@@ -1,0 +1,21 @@
+{
+  "name": "@cotrain/shared-utils",
+  "version": "1.0.0",
+  "description": "Shared utility functions for CoTrain platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@cotrain/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.3"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

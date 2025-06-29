@@ -1,0 +1,71 @@
+# CoTrain Grafana Dashboards Configuration
+# Dashboard provisioning for CoTrain monitoring stack
+
+apiVersion: 1
+
+providers:
+  # CoTrain Application Dashboards
+  - name: 'cotrain-app'
+    orgId: 1
+    folder: 'CoTrain Application'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/cotrain
+
+  # Infrastructure Dashboards
+  - name: 'infrastructure'
+    orgId: 1
+    folder: 'Infrastructure'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/infrastructure
+
+  # Business Metrics Dashboards
+  - name: 'business'
+    orgId: 1
+    folder: 'Business Metrics'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/business
+
+  # Security Dashboards
+  - name: 'security'
+    orgId: 1
+    folder: 'Security'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/security
+
+  # Development Dashboards
+  - name: 'development'
+    orgId: 1
+    folder: 'Development'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/development
+
+  # Pre-built Community Dashboards
+  - name: 'community'
+    orgId: 1
+    folder: 'Community'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/community

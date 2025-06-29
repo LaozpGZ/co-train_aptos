@@ -1,0 +1,340 @@
+version: '3.8'
+
+services:
+  # Development frontend service
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_APTOS_NETWORK=testnet
+      - NEXT_PUBLIC_APTOS_NODE_URL=https://fullnode.testnet.aptoslabs.com/v1
+      - WATCHPACK_POLLING=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - postgres-dev
+      - redis-dev
+    networks:
+      - cotrain-dev-network
+    restart: unless-stopped
+    command: pnpm --filter=frontend dev
+    stdin_open: true
+    tty: true
+
+  # Development backend service
+  backend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - "3001:3001"
+      - "9229:9229" # Node.js debugger port
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://cotrain:cotrain123@postgres-dev:5432/cotrain_dev
+      - REDIS_URL=redis://redis-dev:6379
+      - JWT_SECRET=dev-jwt-secret-key
+      - APTOS_PRIVATE_KEY=${APTOS_PRIVATE_KEY}
+      - APTOS_NETWORK=testnet
+      - APTOS_NODE_URL=https://fullnode.testnet.aptoslabs.com/v1
+      - APTOS_FAUCET_URL=https://faucet.testnet.aptoslabs.com
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/backend/dist
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    depends_on:
+      - postgres-dev
+      - redis-dev
+    networks:
+      - cotrain-dev-network
+    restart: unless-stopped
+    command: pnpm --filter=backend dev:debug
+    stdin_open: true
+    tty: true
+
+  # Development docs service
+  docs-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/docs/build
+    networks:
+      - cotrain-dev-network
+    restart: unless-stopped
+    command: pnpm --filter=docs dev
+    stdin_open: true
+    tty: true
+
+  # Development PostgreSQL database
+  postgres-dev:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=cotrain_dev
+      - POSTGRES_USER=cotrain
+      - POSTGRES_PASSWORD=cotrain123
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    ports:
+      - "5433:5432" # Different port to avoid conflicts
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-dev.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - cotrain-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cotrain -d cotrain_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Development Redis cache
+  redis-dev:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379" # Different port to avoid conflicts
+    volumes:
+      - redis_dev_data:/data
+      - ./docker/redis/redis-dev.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - cotrain-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  # Development MinIO for object storage
+  minio-dev:
+    image: minio/minio:latest
+    ports:
+      - "9010:9000" # Different port to avoid conflicts
+      - "9011:9001"
+    environment:
+      - MINIO_ROOT_USER=cotrain
+      - MINIO_ROOT_PASSWORD=cotrain123
+    volumes:
+      - minio_dev_data:/data
+    networks:
+      - cotrain-dev-network
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Mailhog for email testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI port
+    networks:
+      - cotrain-dev-network
+    restart: unless-stopped
+
+  # Development Elasticsearch
+  elasticsearch-dev:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    ports:
+      - "9201:9200" # Different port to avoid conflicts
+    volumes:
+      - elasticsearch_dev_data:/usr/share/elasticsearch/data
+    networks:
+      - cotrain-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Development Kibana
+  kibana-dev:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    ports:
+      - "5602:5601" # Different port to avoid conflicts
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch-dev:9200
+    depends_on:
+      - elasticsearch-dev
+    networks:
+      - cotrain-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Development tools container
+  dev-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - cotrain-dev-network
+    profiles:
+      - tools
+    command: tail -f /dev/null # Keep container running
+    stdin_open: true
+    tty: true
+
+  # Test runner service
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/coverage
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://cotrain:cotrain123@postgres-dev:5432/cotrain_test
+      - REDIS_URL=redis://redis-dev:6379
+    depends_on:
+      - postgres-dev
+      - redis-dev
+    networks:
+      - cotrain-dev-network
+    profiles:
+      - test
+    command: pnpm test:watch
+
+  # Linter service
+  linter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: lint
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - cotrain-dev-network
+    profiles:
+      - lint
+    command: pnpm lint:watch
+
+  # Type checker service
+  type-checker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - cotrain-dev-network
+    profiles:
+      - typecheck
+    command: pnpm type-check:watch
+
+  # Storybook service
+  storybook:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - "6006:6006"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/storybook-static
+    networks:
+      - cotrain-dev-network
+    profiles:
+      - storybook
+    command: pnpm storybook
+    stdin_open: true
+    tty: true
+
+  # Database migration service
+  db-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://cotrain:cotrain123@postgres-dev:5432/cotrain_dev
+    depends_on:
+      - postgres-dev
+    networks:
+      - cotrain-dev-network
+    profiles:
+      - migrate
+    command: pnpm --filter=backend db:migrate
+
+  # Database seed service
+  db-seed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://cotrain:cotrain123@postgres-dev:5432/cotrain_dev
+    depends_on:
+      - postgres-dev
+      - db-migrate
+    networks:
+      - cotrain-dev-network
+    profiles:
+      - seed
+    command: pnpm --filter=backend db:seed
+
+networks:
+  cotrain-dev-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+  minio_dev_data:
+    driver: local
+  elasticsearch_dev_data:
+    driver: local

@@ -1,50 +1,76 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # Dependencies
-/node_modules
+node_modules/
+**/node_modules/
 /.pnp
 .pnp.js
-
-# pnpm
 .pnpm-store/
 .pnpm-debug.log*
+lerna-debug.log*
 
 # Yarn
 .yarn/install-state.gz
 .yarn/cache
 .yarn/unplugged
 .yarn/build-state.yml
-.yarn/install-state.gz
 .yarnrc.yml
 yarn-error.log*
+yarn.lock
 
 # npm
 npm-debug.log*
 npm-error.log*
 package-lock.json
 
+# pnpm
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.nuxt/
+.output/
+.vite/
+.turbo/
+.vercel/
+.netlify/
+.swc/
+.webpack/
+.rollup.cache/
+*.tsbuildinfo
+next-env.d.ts
+storybook-static/
+
 # Testing
-/coverage
+coverage/
+*.lcov
+.nyc_output/
+.jest/
+jest-results.json
+test-results/
+playwright-report/
+test-results.xml
 
-# Next.js
-/.next/
-/out/
+# Environment variables
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging
+.env.production
+.envrc
+.env.vault
 
-# Production
-/build
-
-# Misc
-.DS_Store
-*.pem
+# Logs
+logs/
 *.log
-
-# pnpm workspace
-.pnpm-workspace.yaml
-
-# Package manager cache
-.npm/
-.pnpm/
-.yarn/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
 # Runtime data
 pids
@@ -52,61 +78,340 @@ pids
 *.seed
 *.pid.lock
 
-# Local Env Files
-.env
-.env*.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Vercel
-.vercel
-
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# Certificates
-certificates
-
-# Backend specific
-dist/
-*.log
-logs/
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
 # Cache directories
 .cache/
 .parcel-cache/
+.npm/
+.pnpm/
+.yarn/
+.eslintcache
+.stylelintcache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
 
 # OS generated files
-Thumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 ehthumbs.db
+Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp
-
-# IDE files
+# IDE and editor files
+.vscode/
+.idea/
 *.swp
 *.swo
 *~
-
-# Docker
-.dockerignore
-
-# Aptos specific (if needed at root level)
-.aptos/
-
-# Editor directories and files
-.vscode/
-.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.iml
+*.ipr
+*.iws
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Security
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+keys/
+certificates/
+
+# Docker
+.dockerignore
+Dockerfile.prod
+
+# Kubernetes
+k8s/secrets/
+*.secret.yaml
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Serverless
+.serverless/
+
+# Vercel
+.vercel
+
+# Aptos specific
+.aptos/
+.movement/
+build/
+
+# AI/ML specific
+models/
+checkpoints/
+training_data/
+datasets/
+*.h5
+*.pkl
+*.joblib
+*.model
+*.pb
+*.onnx
+*.tflite
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+
+# Local development
+.local/
+local.config.js
+local.config.ts
+.local.env
+
+# Documentation build
+docs/build/
+docs/.vuepress/dist/
+
+# Monitoring and analytics
+.sentry/
+.amplitude/
+
+# Reports
+reports/
+*.report.json
+*.report.html
+
+# Profiling
+*.cpuprofile
+*.heapprofile
+*.heapsnapshot
+
+# Generated files
+generated/
+auto-generated/
+__generated__/
+*.generated.*
+.graphql-let/
+graphql.schema.json
+schema.graphql
+
+# Build artifacts
+artifacts/
+
+# Deployment
+deploy/
+deployment/
+.deploy/
+
+# Storybook
+.out
+.storybook-out
+storybook-static
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Local History for Visual Studio Code
+.history/
+
+# Windows specific
+Thumbs.db:encryptable
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS specific
+.AppleDouble
+.LSOverride
+Icon
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux specific
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Sass
+.sass-cache/
+
+# Connect
+.connect.lock
+
+# Grunt
+.grunt
+
+# Lock files
+.lock-wscript
+
+# Editor specific
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Temporary test files
+*.test.tmp
+*.spec.tmp
+
+# Misc
+.connect.lock
+.grunt
+.lock-wscript
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Python specific (if any Python tools are used)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+develop-eggs/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+PYTHONPATH
+
+# Performance profiling
+*.cpuprofile
+*.heapprofile
+*.heapsnapshot
+
+# Local development overrides
+.local/
+local/
+*.local.*
+
+# Database dumps
+*.dump
+*.sql.gz
+
+# Redis dump
+dump.rdb
+
+# MongoDB
+*.mongodb
+
+# Prisma
+prisma/migrations/
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+
+# Firebase
+.firebase/
+.firebaserc
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# MSW
+public/mockServiceWorker.js
+
+# PWA
+public/sw.js
+public/sw.js.map
+public/workbox-*.js
+public/workbox-*.js.map
+
+# Bundle analyzer
+.next/analyze/
+
+# Chromatic
+chromatic-build/
+
+# Capacitor
+android/
+ios/
+.capacitor/
+
+# Tauri
+src-tauri/target/
+
+# Electron
+dist_electron/
+
+# Keep some important files
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json

@@ -1,0 +1,350 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env.local",
+        ".env.production",
+        ".env.development"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**",
+        "build/**",
+        "lib/**",
+        "es/**",
+        "types/**"
+      ],
+      "env": [
+        "NODE_ENV",
+        "NEXT_PUBLIC_*",
+        "DATABASE_URL",
+        "REDIS_URL",
+        "APTOS_*"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "NODE_ENV",
+        "NEXT_PUBLIC_*",
+        "DATABASE_URL",
+        "REDIS_URL",
+        "APTOS_*",
+        "PORT",
+        "HOST"
+      ]
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "NODE_ENV",
+        "NEXT_PUBLIC_*",
+        "DATABASE_URL",
+        "REDIS_URL",
+        "APTOS_*",
+        "PORT",
+        "HOST"
+      ]
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".eslintrc.js",
+        ".eslintrc.json",
+        ".eslintignore",
+        "eslint.config.js"
+      ],
+      "outputs": []
+    },
+    "lint:fix": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".eslintrc.js",
+        ".eslintrc.json",
+        ".eslintignore",
+        "eslint.config.js"
+      ],
+      "outputs": [],
+      "cache": false
+    },
+    "format": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".prettierrc",
+        ".prettierrc.js",
+        ".prettierrc.json",
+        "prettier.config.js",
+        ".prettierignore"
+      ],
+      "outputs": [],
+      "cache": false
+    },
+    "format:check": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".prettierrc",
+        ".prettierrc.js",
+        ".prettierrc.json",
+        "prettier.config.js",
+        ".prettierignore"
+      ],
+      "outputs": []
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "tsconfig.json",
+        "tsconfig.*.json"
+      ],
+      "outputs": ["dist/**", "lib/**", "types/**"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "jest.config.js",
+        "jest.config.json",
+        "vitest.config.ts",
+        "vitest.config.js",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx"
+      ],
+      "outputs": ["coverage/**"],
+      "env": [
+        "NODE_ENV",
+        "TEST_*",
+        "CI"
+      ]
+    },
+    "test:watch": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "NODE_ENV",
+        "TEST_*"
+      ]
+    },
+    "test:coverage": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "jest.config.js",
+        "jest.config.json",
+        "vitest.config.ts",
+        "vitest.config.js",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx"
+      ],
+      "outputs": ["coverage/**"],
+      "env": [
+        "NODE_ENV",
+        "TEST_*",
+        "CI"
+      ]
+    },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "playwright.config.ts",
+        "cypress.config.ts",
+        "**/*.e2e.ts",
+        "**/*.e2e.tsx"
+      ],
+      "outputs": ["test-results/**", "playwright-report/**"],
+      "env": [
+        "NODE_ENV",
+        "TEST_*",
+        "CI",
+        "BASE_URL"
+      ]
+    },
+    "clean": {
+      "cache": false,
+      "outputs": []
+    },
+    "clean:deps": {
+      "cache": false,
+      "outputs": []
+    },
+    "clean:build": {
+      "cache": false,
+      "outputs": []
+    },
+    "db:generate": {
+      "inputs": [
+        "prisma/schema.prisma",
+        "src/database/schema/**",
+        "migrations/**"
+      ],
+      "outputs": ["src/generated/**", "prisma/generated/**"],
+      "env": [
+        "DATABASE_URL"
+      ]
+    },
+    "db:migrate": {
+      "cache": false,
+      "env": [
+        "DATABASE_URL"
+      ]
+    },
+    "db:seed": {
+      "cache": false,
+      "env": [
+        "DATABASE_URL"
+      ]
+    },
+    "db:reset": {
+      "cache": false,
+      "env": [
+        "DATABASE_URL"
+      ]
+    },
+    "contracts:build": {
+      "inputs": [
+        "contracts/**/*.move",
+        "Move.toml",
+        "sources/**"
+      ],
+      "outputs": ["build/**", "artifacts/**"],
+      "env": [
+        "APTOS_*"
+      ]
+    },
+    "contracts:test": {
+      "dependsOn": ["contracts:build"],
+      "inputs": [
+        "contracts/**/*.move",
+        "tests/**/*.move",
+        "Move.toml"
+      ],
+      "outputs": [],
+      "env": [
+        "APTOS_*"
+      ]
+    },
+    "contracts:deploy": {
+      "dependsOn": ["contracts:build", "contracts:test"],
+      "cache": false,
+      "env": [
+        "APTOS_*",
+        "DEPLOYER_PRIVATE_KEY"
+      ]
+    },
+    "docker:build": {
+      "dependsOn": ["build"],
+      "inputs": [
+        "Dockerfile",
+        "docker-compose.yml",
+        ".dockerignore"
+      ],
+      "outputs": [],
+      "cache": false
+    },
+    "docker:up": {
+      "cache": false,
+      "persistent": true
+    },
+    "docker:down": {
+      "cache": false
+    },
+    "storybook": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true,
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".storybook/**",
+        "**/*.stories.@(js|jsx|ts|tsx|mdx)"
+      ]
+    },
+    "storybook:build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".storybook/**",
+        "**/*.stories.@(js|jsx|ts|tsx|mdx)"
+      ],
+      "outputs": ["storybook-static/**"]
+    },
+    "docs:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "docs:build": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "docs/**",
+        "*.md",
+        "docusaurus.config.js",
+        "sidebars.js"
+      ],
+      "outputs": ["build/**", "dist/**"]
+    },
+    "generate": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "codegen.yml",
+        "graphql.config.js",
+        "**/*.graphql",
+        "**/*.gql"
+      ],
+      "outputs": ["src/generated/**", "generated/**"]
+    },
+    "analyze": {
+      "dependsOn": ["build"],
+      "outputs": ["analyze/**", "bundle-analyzer/**"]
+    },
+    "security:audit": {
+      "outputs": ["security-report.json"]
+    },
+    "security:check": {
+      "outputs": []
+    }
+  },
+  "globalDependencies": [
+    ".env",
+    ".env.local",
+    ".env.development",
+    ".env.production",
+    "package.json",
+    "pnpm-workspace.yaml",
+    "turbo.json",
+    "tsconfig.json",
+    ".eslintrc.js",
+    ".prettierrc",
+    "tailwind.config.js"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "CI",
+    "VERCEL",
+    "GITHUB_*"
+  ],
+  "experimentalGlobalPassThroughEnv": [
+    "NODE_ENV",
+    "CI",
+    "VERCEL",
+    "GITHUB_*",
+    "NEXT_PUBLIC_*",
+    "DATABASE_URL",
+    "REDIS_URL",
+    "APTOS_*"
+  ]
+}

@@ -1,120 +1,263 @@
-# CoTrain - Decentralized AI Training Platform
+# CoTrain - Collaborative AI Training Platform on Aptos
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![Aptos](https://img.shields.io/badge/Aptos-Blockchain-orange.svg)](https://aptos.dev/)
-[![Next.js](https://img.shields.io/badge/Next.js-14+-black.svg)](https://nextjs.org/)
-[![NestJS](https://img.shields.io/badge/NestJS-10+-red.svg)](https://nestjs.com/)
+<div align="center">
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" />
+  <img src="https://img.shields.io/badge/Aptos-000000?style=for-the-badge&logo=aptos&logoColor=white" alt="Aptos" />
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis" />
+</div>
 
-CoTrain is a revolutionary Web3 AI training platform that enables decentralized collaborative machine learning with blockchain-based token reward distribution. Built on the Aptos blockchain, CoTrain incentivizes users to participate in AI model training and receive proportional token rewards based on their contributions.
+## 🌟 Overview
 
-## 🌟 Key Features
+CoTrain is a revolutionary collaborative AI training platform built on the Aptos blockchain. It enables distributed machine learning where participants can contribute data, computational resources, and expertise while being fairly rewarded through blockchain-based incentives.
 
-### 🤖 AI Training Platform
-- **Collaborative Training**: Enable multiple participants to contribute to AI model training
-- **Training Session Management**: Create, manage, and monitor AI training sessions
-- **Contributor Profiles**: Manage participant capabilities and contribution history
-- **Real-time Updates**: WebSocket-based live updates for training progress
+### Key Features
 
-### 🔗 Blockchain Integration
-- **Aptos Move Smart Contracts**: Decentralized reward distribution system
-- **Token Rewards**: Automatic token distribution based on contribution scores
-- **Wallet Integration**: Seamless Aptos wallet connectivity
-- **Transparent Governance**: Blockchain-based session and reward management
+- 🤖 **Collaborative AI Training**: Distributed machine learning with multiple participants
+- 🔗 **Blockchain Integration**: Built on Aptos for transparency and fair rewards
+- 💰 **Tokenized Incentives**: Earn tokens for contributing data, compute, and expertise
+- 🔒 **Privacy-Preserving**: Federated learning ensures data privacy
+- 📊 **Real-time Monitoring**: Track training progress and model performance
+- 🌐 **Web3 Integration**: Seamless wallet connection and blockchain interactions
+- 📱 **Modern UI/UX**: Responsive design with dark/light mode support
 
-### 🏗️ Modern Architecture
-- **Monorepo Structure**: Organized codebase with frontend, backend, and smart contracts
-- **Type Safety**: Full TypeScript implementation across all components
-- **Scalable Backend**: NestJS with PostgreSQL and Redis
-- **Modern Frontend**: Next.js with shadcn/ui components
+## 🏗️ Architecture
 
-## 🏛️ Architecture
+This is a monorepo containing:
 
 ```
 co-train_aptos/
 ├── apps/
-│   ├── frontend/          # Next.js React application
+│   ├── frontend/          # Next.js web application
 │   └── backend/           # NestJS API server
+├── packages/
+│   ├── shared-types/      # Shared TypeScript types
+│   ├── shared-utils/      # Common utility functions
+│   └── shared-config/     # Configuration management
 ├── move/                  # Aptos Move smart contracts
-│   ├── sources/           # Contract source code
-│   ├── scripts/           # Deployment scripts
-│   └── tests/             # Contract tests
-└── docs/                  # Documentation
+├── configs/              # Shared configuration files
+├── scripts/              # Development and deployment scripts
+└── docs/                 # Documentation
 ```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- **Node.js** 18+ and **pnpm**
-- **PostgreSQL** 13+ and **Redis** 6+
-- **Docker** and **Docker Compose**
-- **Aptos CLI** (for smart contract deployment)
+- **Node.js** >= 18.0.0
+- **pnpm** >= 8.0.0
+- **Docker** (for databases)
+- **Git**
+- **Aptos CLI** (for smart contracts)
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-org/co-train_aptos.git
+   git clone https://github.com/BytebunnyLabs/co-train_aptos.git
    cd co-train_aptos
    ```
 
-2. **Install dependencies**
+2. **Run the setup script**
    ```bash
-   pnpm install
+   pnpm setup
    ```
+   This will:
+   - Install all dependencies
+   - Set up environment variables
+   - Build shared packages
+   - Start required services (PostgreSQL, Redis)
+   - Run database migrations
 
-3. **Start database services**
+3. **Start development servers**
    ```bash
-   cd apps/backend
-   docker-compose up -d
-   ```
-
-4. **Configure environment variables**
-   ```bash
-   # Copy and configure backend environment
-   cp apps/backend/.env.example apps/backend/.env
-   
-   # Copy and configure frontend environment
-   cp .env.example .env.local
-   ```
-
-5. **Start development servers**
-   ```bash
-   # Start backend (runs on http://localhost:3001)
-   cd apps/backend
-   pnpm start:dev
-   
-   # Start frontend (runs on http://localhost:3000)
-   cd apps/frontend
+   # Start all applications
    pnpm dev
+   
+   # Or start individually
+   pnpm dev:frontend    # Frontend at http://localhost:3000
+   pnpm dev:backend     # Backend at http://localhost:8000
    ```
 
-### Smart Contract Deployment
+## 📋 Available Scripts
 
-1. **Install Aptos CLI**
-   ```bash
-   # macOS
-   brew install aptos
-   
-   # Or install from source
-   cargo install --git https://github.com/aptos-labs/aptos-core.git aptos
-   ```
+### Development
+```bash
+pnpm dev                 # Start all apps in development mode
+pnpm dev:frontend        # Start frontend only
+pnpm dev:backend         # Start backend only
+pnpm setup              # Initial project setup
+```
 
-2. **Deploy contracts**
-   ```bash
-   cd move
-   
-   # Compile and test
-   ./deploy.sh compile
-   ./deploy.sh test
-   
-   # Deploy to devnet
-   ./deploy.sh deploy --profile devnet
-   
-   # Or full deployment
-   ./deploy.sh full --profile devnet
-   ```
+### Building
+```bash
+pnpm build              # Build all packages and apps
+pnpm build:packages     # Build shared packages only
+pnpm build:apps         # Build applications only
+pnpm build:clean        # Clean build with fresh dependencies
+pnpm build:prod         # Production build
+```
+
+### Testing
+```bash
+pnpm test               # Run all tests
+pnpm test:unit          # Run unit tests
+pnpm test:integration   # Run integration tests
+pnpm test:e2e           # Run end-to-end tests
+pnpm test:watch         # Run tests in watch mode
+pnpm test:coverage      # Run tests with coverage
+```
+
+### Code Quality
+```bash
+pnpm lint               # Run linting
+pnpm lint:fix           # Fix linting issues
+pnpm format             # Format code with Prettier
+pnpm type-check         # TypeScript type checking
+pnpm security-check     # Security vulnerability check
+pnpm quality            # Run all quality checks
+```
+
+### Database Management
+```bash
+pnpm db:start           # Start PostgreSQL and Redis
+pnpm db:stop            # Stop databases
+pnpm db:reset           # Reset database with fresh data
+pnpm db:migrate         # Run database migrations
+pnpm db:seed            # Seed database with sample data
+pnpm db:status          # Check database status
+```
+
+### Smart Contracts
+```bash
+pnpm contracts:build    # Compile Move contracts
+pnpm contracts:test     # Test Move contracts
+pnpm contracts:deploy   # Deploy contracts to network
+```
+
+### Deployment
+```bash
+pnpm deploy:dev         # Deploy to development
+pnpm deploy:staging     # Deploy to staging
+pnpm deploy:prod        # Deploy to production
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Copy `.env.template` to `.env` and configure:
+
+```bash
+cp .env.template .env
+```
+
+Key configuration sections:
+- **Database**: PostgreSQL connection settings
+- **Redis**: Cache and session storage
+- **JWT**: Authentication tokens
+- **Aptos**: Blockchain network configuration
+- **File Upload**: Storage settings
+- **Email**: SMTP configuration
+- **Monitoring**: Logging and analytics
+
+### Development Setup
+
+The setup script will guide you through:
+1. Installing dependencies
+2. Setting up environment variables
+3. Starting required services
+4. Running initial migrations
+5. Creating sample data
+
+## 🏛️ Smart Contracts
+
+The platform uses Aptos Move smart contracts for:
+
+- **Training Sessions**: Manage collaborative training rounds
+- **Contributions**: Track data and compute contributions
+- **Rewards**: Distribute tokens based on contributions
+- **Governance**: Community voting on platform decisions
+
+### Contract Development
+
+```bash
+cd move
+aptos move compile      # Compile contracts
+aptos move test         # Run contract tests
+aptos move publish      # Deploy to network
+```
+
+### Key Functions
+
+```move
+// Create a new training session
+public entry fun create_training_session(
+    creator: &signer,
+    session_id: u64,
+    reward_amount: u64
+)
+
+// Register as a participant
+public entry fun register_participant(
+    participant: &signer,
+    session_id: u64
+)
+
+// Submit contribution score
+public entry fun submit_contribution(
+    participant: &signer,
+    session_id: u64,
+    score: u64
+)
+
+// Complete session and distribute rewards
+public entry fun complete_session_and_distribute(
+    creator: &signer,
+    session_id: u64
+)
+```
+
+## 🧪 Testing
+
+Comprehensive testing setup with:
+
+- **Unit Tests**: Jest for individual components
+- **Integration Tests**: API and database testing
+- **E2E Tests**: Playwright for full user flows
+- **Contract Tests**: Move testing framework
+
+### Running Tests
+
+```bash
+# Run specific test types
+pnpm test:unit
+pnpm test:integration
+pnpm test:e2e
+
+# Run tests for specific packages
+pnpm --filter '@cotrain/frontend' test
+pnpm --filter '@cotrain/backend' test
+
+# Watch mode for development
+pnpm test:watch
+```
+
+## 📦 Package Structure
+
+### Shared Packages
+
+- **`@cotrain/shared-types`**: TypeScript type definitions
+- **`@cotrain/shared-utils`**: Common utility functions
+- **`@cotrain/shared-config`**: Configuration management
+
+### Applications
+
+- **`@cotrain/frontend`**: Next.js web application
+- **`@cotrain/backend`**: NestJS API server
 
 ## 📱 Applications
 
@@ -155,113 +298,27 @@ pnpm start:dev
 
 **API Documentation**: Available at `http://localhost:3001/api/docs`
 
-## 🔗 Smart Contracts
-
-### Training Rewards Contract
-
-The core smart contract (`training_rewards.move`) manages:
-
-- **Training Session Lifecycle**: Creation, participant registration, completion
-- **Contribution Tracking**: Score-based contribution measurement
-- **Reward Distribution**: Proportional token distribution based on contributions
-- **Event Logging**: Transparent on-chain activity tracking
-
-### Key Functions
-
-```move
-// Create a new training session
-public entry fun create_training_session(
-    creator: &signer,
-    session_id: u64,
-    reward_amount: u64
-)
-
-// Register as a participant
-public entry fun register_participant(
-    participant: &signer,
-    session_id: u64
-)
-
-// Submit contribution score
-public entry fun submit_contribution(
-    participant: &signer,
-    session_id: u64,
-    score: u64
-)
-
-// Complete session and distribute rewards
-public entry fun complete_session_and_distribute(
-    creator: &signer,
-    session_id: u64
-)
-```
-
-## 🛠️ Development
-
-### Project Structure
-
-- **`apps/frontend/`**: Next.js frontend application
-- **`apps/backend/`**: NestJS backend API
-- **`move/`**: Aptos Move smart contracts
-- **`scripts/`**: Deployment and utility scripts
-
-### Available Scripts
-
-```bash
-# Development
-pnpm dev              # Start all development servers
-pnpm build            # Build all applications
-pnpm test             # Run all tests
-pnpm lint             # Lint all code
-pnpm format           # Format all code
-
-# Backend specific
-cd apps/backend
-pnpm start:dev        # Start backend in development mode
-pnpm test:e2e         # Run end-to-end tests
-pnpm migration:run    # Run database migrations
-
-# Frontend specific
-cd apps/frontend
-pnpm dev              # Start frontend development server
-pnpm build            # Build for production
-
-# Smart contracts
-cd move
-./deploy.sh compile   # Compile contracts
-./deploy.sh test      # Run contract tests
-./deploy.sh deploy    # Deploy to network
-```
-
-### Environment Variables
-
-#### Backend (`.env`)
-```bash
-# Database
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cotrain
-REDIS_URL=redis://localhost:6379
-
-# Authentication
-JWT_SECRET=your-jwt-secret
-JWT_EXPIRES_IN=7d
-
-# Aptos
-APTOS_NETWORK=devnet
-APTOS_PRIVATE_KEY=your-private-key
-APTOS_CONTRACT_ADDRESS=your-contract-address
-```
-
-#### Frontend (`.env.local`)
-```bash
-# API
-NEXT_PUBLIC_API_URL=http://localhost:3001
-
-# Aptos
-NEXT_PUBLIC_APTOS_NETWORK=devnet
-NEXT_PUBLIC_CONTRACT_ADDRESS=your-contract-address
-```
-
 ## 🚀 Deployment
+
+### Development
+```bash
+pnpm deploy:dev
+```
+
+### Staging
+```bash
+pnpm deploy:staging
+```
+
+### Production
+```bash
+pnpm deploy:prod
+```
+
+Deployment supports:
+- **Docker Compose**: Local and staging deployments
+- **Kubernetes**: Production-ready orchestration
+- **Manual**: Traditional server deployment
 
 ### Production Deployment
 
@@ -277,39 +334,83 @@ NEXT_PUBLIC_CONTRACT_ADDRESS=your-contract-address
 docker-compose up --build
 ```
 
-## 📚 Documentation
-
-- **[Integration Guide](./INTEGRATION.md)**: Detailed integration instructions
-- **[Deployment Guide](./DEPLOYMENT.md)**: Production deployment guide
-- **[API Documentation](http://localhost:3001/api/docs)**: Swagger API docs
-- **[Smart Contract Docs](./move/README.md)**: Move contract documentation
-
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. **Fork the repository**
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. **Make your changes**
+4. **Run quality checks**
+   ```bash
+   pnpm quality
+   pnpm test
+   ```
+5. **Commit your changes**
+   ```bash
+   git commit -m 'Add amazing feature'
+   ```
+6. **Push to the branch**
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+7. **Open a Pull Request**
+
+### Development Guidelines
+
+- Follow TypeScript best practices
+- Write tests for new features
+- Use conventional commit messages
+- Ensure all quality checks pass
+- Update documentation as needed
+
+## 📚 Documentation
+
+- [API Documentation](./docs/api/README.md)
+- [Frontend Guide](./apps/frontend/README.md)
+- [Backend Guide](./apps/backend/README.md)
+- [Smart Contracts](./move/README.md)
+- [Integration Guide](./INTEGRATION.md)
+- [Deployment Guide](./DEPLOYMENT.md)
+
+## 🔍 Monitoring & Analytics
+
+- **Application Monitoring**: Real-time performance metrics
+- **Error Tracking**: Comprehensive error logging
+- **User Analytics**: Usage patterns and insights
+- **Blockchain Monitoring**: Transaction and contract events
+
+## 🛡️ Security
+
+- **Authentication**: JWT-based with refresh tokens
+- **Authorization**: Role-based access control
+- **Data Encryption**: At rest and in transit
+- **Smart Contract Audits**: Regular security reviews
+- **Dependency Scanning**: Automated vulnerability checks
 
 ## 📄 License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- [Aptos Labs](https://aptos.dev/) for the blockchain infrastructure
-- [NestJS](https://nestjs.com/) for the backend framework
+- [Aptos Labs](https://aptoslabs.com/) for the blockchain infrastructure
 - [Next.js](https://nextjs.org/) for the frontend framework
+- [NestJS](https://nestjs.com/) for the backend framework
 - [shadcn/ui](https://ui.shadcn.com/) for the UI components
+- The open-source community for amazing tools and libraries
 
 ## 📞 Support
 
-For support and questions:
-- Create an [issue](https://github.com/your-org/co-train_aptos/issues)
-- Join our [Discord community](https://discord.gg/cotrain)
-- Follow us on [Twitter](https://twitter.com/cotrain_ai)
+- **Issues**: [GitHub Issues](https://github.com/BytebunnyLabs/co-train_aptos/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/BytebunnyLabs/co-train_aptos/discussions)
+- **Email**: support@cotrain.ai
+- **Discord**: [Join our community](https://discord.gg/cotrain)
 
 ---
 
-**CoTrain** - Democratizing AI through decentralized collaboration 🚀
+<div align="center">
+  <p>Built with ❤️ by the CoTrain Team</p>
+  <p>Empowering collaborative AI through blockchain technology</p>
+</div>

@@ -1,0 +1,345 @@
+# Dependencies
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.vite/
+.turbo/
+.vercel/
+.netlify/
+.cache/
+.parcel-cache/
+.swc/
+.webpack/
+.rollup.cache/
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnpm-store/
+.yarn/
+.pnp.*
+
+# TypeScript
+*.tsbuildinfo
+.tscache/
+
+# Generated files
+generated/
+__generated__/
+*.generated.*
+.graphql-let/
+graphql.schema.json
+schema.graphql
+
+# Storybook
+storybook-static/
+.storybook/public/
+
+# Documentation
+docs/build/
+docs/.docusaurus/
+docs/node_modules/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Kubernetes
+*.yaml
+*.yml
+kustomization.yaml
+
+# Terraform
+*.tf
+*.tfvars
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Helm
+charts/
+*.tgz
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+Jenkinsfile
+.buildkite/
+
+# Monitoring and Analytics
+.sentry/
+.lighthouseci/
+
+# Security
+.secrets/
+secrets/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Backup files
+*.backup
+*.bak
+*.old
+*.orig
+
+# Archive files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Binary files
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+
+# Media files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.svg
+*.ico
+*.webp
+*.mp4
+*.mp3
+*.wav
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+
+# Font files
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.otf
+
+# Aptos specific
+*.move
+Move.toml
+Move.lock
+build/
+.aptos/
+
+# AI/ML
+*.model
+*.pkl
+*.h5
+*.pb
+*.onnx
+*.tflite
+models/
+checkpoints/
+
+# Data files
+*.csv
+*.json
+*.xml
+*.sql
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# Python specific (if any Python tools are used)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+PYTHONPATH
+
+# Performance profiling
+*.cpuprofile
+*.heapprofile
+*.heapsnapshot
+
+# Local development overrides
+.local/
+local/
+*.local.*
+
+# Temporary test files
+*.test.tmp
+*.spec.tmp
+test-results/
+test-output/
+
+# Deployment
+deploy/
+deployment/
+.deploy/
+
+# Cloud provider specific
+.aws/
+.gcp/
+.azure/
+
+# CDN and static assets
+cdn/
+static/
+assets/
+public/uploads/
+public/images/
+public/videos/
+public/audio/
+
+# Backup and recovery
+backup/
+restore/
+.backup/
+.restore/
+
+# Other
+.vite-inspect/
+.eslintcache
+.stylelintcache
+.prettiercache
+.rush/
+.changeset/
+.size-limit.json
+.ultra.cache.json
+.nx/
+
+# Important: Files that should NOT be ignored
+# (These are important config files that should be linted)
+!.eslintrc.js
+!.eslintrc.json
+!.eslintrc.yml
+!.eslintrc.yaml
+!.prettierrc
+!.prettierrc.js
+!.prettierrc.json
+!.prettierrc.yml
+!.prettierrc.yaml
+!jest.config.js
+!jest.config.ts
+!jest.setup.js
+!jest.setup.ts
+!tailwind.config.js
+!tailwind.config.ts
+!postcss.config.js
+!postcss.config.ts
+!next.config.js
+!next.config.ts
+!vite.config.js
+!vite.config.ts
+!vitest.config.js
+!vitest.config.ts
+!turbo.json
+!tsconfig.json
+!tsconfig.*.json
+!package.json
+!pnpm-workspace.yaml
+!.gitignore
+!.dockerignore
+!README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!LICENSE
+!CODE_OF_CONDUCT.md

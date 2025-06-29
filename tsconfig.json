@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "CoTrain Monorepo",
+  "compilerOptions": {
+    // Type Checking
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Modules
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": false,
+
+    // Emit
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "preserve",
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": false,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "removeComments": false,
+    "downlevelIteration": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "allowUmdGlobalAccess": false,
+    "preserveConstEnums": false,
+    "inlineSourceMap": false,
+    "inlineSources": false,
+    "emitBOM": false,
+    "newLine": "lf",
+    "stripInternal": false,
+    "noEmitHelpers": false,
+    "noEmitOnError": false,
+    "preserveValueImports": false,
+
+    // JavaScript Support
+    "maxNodeModuleJsDepth": 1,
+
+    // Interop Constraints
+    "allowArbitraryExtensions": false,
+    "noResolve": false,
+
+    // Language and Environment
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": true,
+
+    // Compiler Diagnostics
+    "explainFiles": false,
+    "extendedDiagnostics": false,
+    "generateCpuProfile": "profile.cpuprofile",
+    "listEmittedFiles": false,
+    "listFiles": false,
+    "traceResolution": false,
+
+    // Projects
+    "composite": false,
+    "disableReferencedProjectLoad": false,
+    "disableSolutionSearching": false,
+    "disableSourceOfProjectReferenceRedirect": false,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+
+    // Output Formatting
+    "noErrorTruncation": false,
+    "preserveWatchOutput": false,
+    "pretty": true,
+
+    // Completeness
+    "skipDefaultLibCheck": false,
+    "skipLibCheck": true,
+
+    // Command Line
+
+    // Watch Options
+
+    // Type Acquisition
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "types": ["node", "jest", "testing-library__jest-dom"],
+
+    // Path Mapping
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/stores/*": ["./src/stores/*"],
+      "@/config/*": ["./src/config/*"],
+      "@/constants/*": ["./src/constants/*"],
+      "@/styles/*": ["./src/styles/*"],
+      "@/assets/*": ["./src/assets/*"],
+      "@/public/*": ["./public/*"],
+      "@cotrain/ui": ["./packages/ui/src/index.ts"],
+      "@cotrain/ui/*": ["./packages/ui/src/*"],
+      "@cotrain/shared": ["./packages/shared/src/index.ts"],
+      "@cotrain/shared/*": ["./packages/shared/src/*"],
+      "@cotrain/config": ["./packages/config/src/index.ts"],
+      "@cotrain/config/*": ["./packages/config/src/*"],
+      "@cotrain/utils": ["./packages/utils/src/index.ts"],
+      "@cotrain/utils/*": ["./packages/utils/src/*"],
+      "@cotrain/types": ["./packages/types/src/index.ts"],
+      "@cotrain/types/*": ["./packages/types/src/*"],
+      "@cotrain/hooks": ["./packages/hooks/src/index.ts"],
+      "@cotrain/hooks/*": ["./packages/hooks/src/*"],
+      "@cotrain/stores": ["./packages/stores/src/index.ts"],
+      "@cotrain/stores/*": ["./packages/stores/src/*"],
+      "@cotrain/contracts": ["./contracts/src/index.ts"],
+      "@cotrain/contracts/*": ["./contracts/src/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.mjs",
+    "**/*.json",
+    "next-env.d.ts",
+    "global.d.ts",
+    "types/**/*",
+    "apps/**/*",
+    "packages/**/*",
+    "libs/**/*",
+    "configs/**/*",
+    "tools/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "dist",
+    "**/dist",
+    "build",
+    "**/build",
+    ".next",
+    "**/.next",
+    "out",
+    "**/out",
+    "coverage",
+    "**/coverage",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/__tests__",
+    "**/__mocks__",
+    "**/storybook-static",
+    "**/.storybook/public",
+    "**/public",
+    "**/.turbo",
+    "**/.vercel",
+    "**/.netlify",
+    "contracts/build",
+    "contracts/**/*.move",
+    "**/*.move",
+    "Move.toml",
+    "**/Move.toml",
+    "**/.aptos",
+    "**/.movement",
+    "**/generated",
+    "**/__generated__",
+    "**/*.generated.*",
+    "**/temp",
+    "**/tmp",
+    "**/.cache",
+    "**/.vscode",
+    "**/.idea",
+    "**/.DS_Store"
+  ],
+  "references": [
+    {
+      "path": "./apps/frontend"
+    },
+    {
+      "path": "./apps/backend"
+    },
+    {
+      "path": "./packages/ui"
+    },
+    {
+      "path": "./packages/shared"
+    },
+    {
+      "path": "./packages/config"
+    },
+    {
+      "path": "./packages/utils"
+    },
+    {
+      "path": "./packages/types"
+    },
+    {
+      "path": "./packages/hooks"
+    },
+    {
+      "path": "./packages/stores"
+    }
+  ],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+    "compilerOptions": {
+      "module": "ESNext",
+      "moduleResolution": "node"
+    }
+  }
+}

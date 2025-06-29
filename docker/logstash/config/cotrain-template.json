@@ -1,0 +1,376 @@
+{
+  "index_patterns": ["cotrain-*"],
+  "version": 1,
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "refresh_interval": "5s",
+      "codec": "best_compression",
+      "max_result_window": 50000
+    },
+    "analysis": {
+      "analyzer": {
+        "cotrain_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "stop",
+            "snowball"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "@timestamp": {
+        "type": "date",
+        "format": "strict_date_optional_time||epoch_millis"
+      },
+      "timestamp": {
+        "type": "date",
+        "format": "strict_date_optional_time||epoch_millis"
+      },
+      "level": {
+        "type": "keyword",
+        "fields": {
+          "text": {
+            "type": "text",
+            "analyzer": "cotrain_analyzer"
+          }
+        }
+      },
+      "service": {
+        "type": "keyword",
+        "fields": {
+          "text": {
+            "type": "text",
+            "analyzer": "cotrain_analyzer"
+          }
+        }
+      },
+      "service_type": {
+        "type": "keyword"
+      },
+      "technology": {
+        "type": "keyword"
+      },
+      "environment": {
+        "type": "keyword"
+      },
+      "cluster": {
+        "type": "keyword"
+      },
+      "version": {
+        "type": "keyword"
+      },
+      "message": {
+        "type": "text",
+        "analyzer": "cotrain_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "log_message": {
+        "type": "text",
+        "analyzer": "cotrain_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "context": {
+        "type": "keyword",
+        "fields": {
+          "text": {
+            "type": "text",
+            "analyzer": "cotrain_analyzer"
+          }
+        }
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "session_id": {
+        "type": "keyword"
+      },
+      "trace_id": {
+        "type": "keyword"
+      },
+      "span_id": {
+        "type": "keyword"
+      },
+      "api_endpoint": {
+        "type": "keyword",
+        "fields": {
+          "text": {
+            "type": "text",
+            "analyzer": "cotrain_analyzer"
+          }
+        }
+      },
+      "container_id": {
+        "type": "keyword"
+      },
+      "container_name": {
+        "type": "keyword"
+      },
+      "container_image": {
+        "type": "keyword"
+      },
+      "pid": {
+        "type": "integer"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "fields": {
+        "type": "object",
+        "dynamic": true
+      },
+      "clientip": {
+        "type": "ip"
+      },
+      "ident": {
+        "type": "keyword"
+      },
+      "auth": {
+        "type": "keyword"
+      },
+      "verb": {
+        "type": "keyword"
+      },
+      "request": {
+        "type": "text",
+        "analyzer": "cotrain_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "httpversion": {
+        "type": "keyword"
+      },
+      "response": {
+        "type": "integer"
+      },
+      "bytes": {
+        "type": "long"
+      },
+      "referrer": {
+        "type": "text",
+        "analyzer": "cotrain_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "agent": {
+        "type": "text",
+        "analyzer": "cotrain_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "responsetime": {
+        "type": "float"
+      },
+      "duration": {
+        "type": "float"
+      },
+      "status_code": {
+        "type": "integer"
+      },
+      "method": {
+        "type": "keyword"
+      },
+      "url": {
+        "type": "text",
+        "analyzer": "cotrain_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "path": {
+        "type": "text",
+        "analyzer": "cotrain_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "query_params": {
+        "type": "object",
+        "dynamic": true
+      },
+      "headers": {
+        "type": "object",
+        "dynamic": true
+      },
+      "body": {
+        "type": "text",
+        "analyzer": "cotrain_analyzer"
+      },
+      "error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "text",
+            "analyzer": "cotrain_analyzer"
+          },
+          "stack": {
+            "type": "text",
+            "analyzer": "cotrain_analyzer"
+          },
+          "code": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          }
+        }
+      },
+      "performance": {
+        "type": "object",
+        "properties": {
+          "cpu_usage": {
+            "type": "float"
+          },
+          "memory_usage": {
+            "type": "long"
+          },
+          "response_time": {
+            "type": "float"
+          },
+          "throughput": {
+            "type": "float"
+          }
+        }
+      },
+      "blockchain": {
+        "type": "object",
+        "properties": {
+          "transaction_hash": {
+            "type": "keyword"
+          },
+          "block_number": {
+            "type": "long"
+          },
+          "gas_used": {
+            "type": "long"
+          },
+          "gas_price": {
+            "type": "long"
+          },
+          "from_address": {
+            "type": "keyword"
+          },
+          "to_address": {
+            "type": "keyword"
+          },
+          "amount": {
+            "type": "long"
+          },
+          "status": {
+            "type": "keyword"
+          }
+        }
+      },
+      "ml": {
+        "type": "object",
+        "properties": {
+          "model_id": {
+            "type": "keyword"
+          },
+          "model_type": {
+            "type": "keyword"
+          },
+          "training_session_id": {
+            "type": "keyword"
+          },
+          "accuracy": {
+            "type": "float"
+          },
+          "loss": {
+            "type": "float"
+          },
+          "epoch": {
+            "type": "integer"
+          },
+          "batch_size": {
+            "type": "integer"
+          },
+          "learning_rate": {
+            "type": "float"
+          }
+        }
+      },
+      "security": {
+        "type": "object",
+        "properties": {
+          "event_type": {
+            "type": "keyword"
+          },
+          "source_ip": {
+            "type": "ip"
+          },
+          "user_agent": {
+            "type": "text",
+            "analyzer": "cotrain_analyzer"
+          },
+          "auth_method": {
+            "type": "keyword"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "failure_reason": {
+            "type": "keyword"
+          }
+        }
+      },
+      "business": {
+        "type": "object",
+        "properties": {
+          "event_type": {
+            "type": "keyword"
+          },
+          "revenue": {
+            "type": "float"
+          },
+          "user_count": {
+            "type": "integer"
+          },
+          "session_count": {
+            "type": "integer"
+          },
+          "conversion_rate": {
+            "type": "float"
+          }
+        }
+      }
+    }
+  },
+  "aliases": {
+    "cotrain-logs": {}
+  }
+}

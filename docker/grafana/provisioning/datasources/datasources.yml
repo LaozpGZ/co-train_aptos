@@ -1,0 +1,169 @@
+# CoTrain Grafana Datasources Configuration
+# Datasource provisioning for CoTrain monitoring stack
+
+apiVersion: 1
+
+datasources:
+  # Prometheus - Main metrics datasource
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: 2.40.0
+      cacheLevel: 'High'
+      disableRecordingRules: false
+      incrementalQueryOverlapWindow: 10m
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: jaeger
+    secureJsonData: {}
+
+  # Jaeger - Distributed tracing
+  - name: Jaeger
+    type: jaeger
+    uid: jaeger
+    access: proxy
+    url: http://jaeger:16686
+    editable: true
+    jsonData:
+      tracesToLogs:
+        datasourceUid: loki
+        tags: ['job', 'instance', 'pod', 'namespace']
+        mappedTags: [{ key: 'service.name', value: 'service' }]
+        mapTagNamesEnabled: false
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '1h'
+        filterByTraceID: false
+        filterBySpanID: false
+      tracesToMetrics:
+        datasourceUid: prometheus
+        tags: [{ key: 'service.name', value: 'service' }, { key: 'job' }]
+        queries:
+          - name: 'Sample query'
+            query: 'sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m]))'
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+      spanBar:
+        type: 'Tag'
+        tag: 'http.path'
+
+  # Loki - Log aggregation (if using Loki instead of ELK)
+  - name: Loki
+    type: loki
+    uid: loki
+    access: proxy
+    url: http://loki:3100
+    editable: true
+    jsonData:
+      derivedFields:
+        - datasourceUid: jaeger
+          matcherRegex: "trace_id=(\\w+)"
+          name: TraceID
+          url: '$${__value.raw}'
+        - datasourceUid: prometheus
+          matcherRegex: "user_id=(\\w+)"
+          name: UserMetrics
+          url: '/d/user-dashboard?var-user_id=$${__value.raw}'
+
+  # Elasticsearch - Log storage and search
+  - name: Elasticsearch
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    database: 'cotrain-logs-*'
+    editable: true
+    jsonData:
+      index: 'cotrain-logs'
+      timeField: '@timestamp'
+      esVersion: '8.0.0'
+      logMessageField: 'message'
+      logLevelField: 'level'
+      maxConcurrentShardRequests: 5
+      includeFrozen: false
+      xpack: false
+
+  # PostgreSQL - Application database metrics
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: cotrain
+    user: postgres
+    editable: true
+    secureJsonData:
+      password: postgres
+    jsonData:
+      sslmode: 'disable'
+      maxOpenConns: 100
+      maxIdleConns: 100
+      maxIdleConnsAuto: true
+      connMaxLifetime: 14400
+      postgresVersion: 1400
+      timescaledb: false
+
+  # Redis - Cache metrics (if using Redis exporter)
+  - name: Redis
+    type: redis-datasource
+    access: proxy
+    url: redis://redis:6379
+    editable: true
+    jsonData:
+      client: 'standalone'
+      poolSize: 5
+      timeout: 10
+      pingInterval: 0
+      pipelineWindow: 0
+    secureJsonData: {}
+
+  # TestData - For development and testing
+  - name: TestData
+    type: testdata
+    access: proxy
+    editable: true
+    jsonData: {}
+
+  # CloudWatch (if deploying to AWS)
+  # - name: CloudWatch
+  #   type: cloudwatch
+  #   access: proxy
+  #   editable: true
+  #   jsonData:
+  #     authType: 'credentials'
+  #     defaultRegion: 'us-east-1'
+  #     customMetricsNamespaces: 'CoTrain'
+  #   secureJsonData:
+  #     accessKey: 'YOUR_ACCESS_KEY'
+  #     secretKey: 'YOUR_SECRET_KEY'
+
+  # Azure Monitor (if deploying to Azure)
+  # - name: Azure Monitor
+  #   type: grafana-azure-monitor-datasource
+  #   access: proxy
+  #   editable: true
+  #   jsonData:
+  #     azureAuthType: 'msi'
+  #     subscriptionId: 'YOUR_SUBSCRIPTION_ID'
+  #   secureJsonData: {}
+
+  # Google Cloud Monitoring (if deploying to GCP)
+  # - name: Google Cloud Monitoring
+  #   type: stackdriver
+  #   access: proxy
+  #   editable: true
+  #   jsonData:
+  #     authenticationType: 'gce'
+  #     defaultProject: 'your-project-id'
+  #   secureJsonData: {}
+
+# Delete datasources that are not in this list
+deleteDatasources:
+  - name: 'Old Prometheus'
+    orgId: 1
