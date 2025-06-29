@@ -11,6 +11,7 @@ import { PropsWithChildren } from "react";
 import { AutoConnectProvider } from "@/components/AutoConnectProvider";
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
 import { ConditionalNavigation } from "@/components/ConditionalNavigation";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -41,13 +42,15 @@ export default function RootLayout({ children }: PropsWithChildren) {
           <AutoConnectProvider>
             <ReactQueryClientProvider>
               <WalletProvider>
-                <div className="min-h-screen flex flex-col">
-                  <ConditionalNavigation />
-                  <main className="flex-1">
-                    {children}
-                  </main>
-                </div>
-                <Toaster />
+                <AuthProvider>
+                  <div className="min-h-screen flex flex-col">
+                    <ConditionalNavigation />
+                    <main className="flex-1">
+                      {children}
+                    </main>
+                  </div>
+                  <Toaster />
+                </AuthProvider>
               </WalletProvider>
             </ReactQueryClientProvider>
           </AutoConnectProvider>

@@ -1,15 +1,22 @@
 [package]
-name = "script"
+name = "cotrain"
 version = "1.0.0"
-authors = []
+authors = ["CoTrain Team"]
 
 [addresses]
+cotrain = "_"
 
 [dev-addresses]
+cotrain = "0x1"
 
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-framework.git"
 rev = "mainnet"
 subdir = "aptos-framework"
+
+[dependencies.AptosToken]
+git = "https://github.com/aptos-labs/aptos-framework.git"
+rev = "mainnet"
+subdir = "aptos-token"
 
 [dev-dependencies]

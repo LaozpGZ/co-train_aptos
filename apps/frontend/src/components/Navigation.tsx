@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Github, ExternalLink, Wallet } from "lucide-react";
+import { Menu, X, Github, ExternalLink, Wallet, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { WalletSelector } from "@/components/WalletSelector";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NavigationProps {
   className?: string;
@@ -16,6 +18,7 @@ interface NavigationProps {
 export function Navigation({ className, currentPage, setCurrentPage }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { isAuthenticated, user } = useAuth();
 
   const navItems = [
     { id: "home", label: "Home", href: "/" },
@@ -25,6 +28,10 @@ export function Navigation({ className, currentPage, setCurrentPage }: Navigatio
     { id: "docs", label: "Docs", href: "/docs" },
     { id: "about", label: "About", href: "/about" },
     { id: "demo", label: "Tech Demo", href: "/demo" },
+  ];
+
+  const authenticatedNavItems = [
+    { id: "profile", label: "Profile", href: "/profile", icon: User },
   ];
 
   const externalLinks = [
@@ -88,7 +95,25 @@ export function Navigation({ className, currentPage, setCurrentPage }: Navigatio
                 <link.icon className="w-5 h-5" />
               </a>
             ))}
+            
+            {/* Authenticated Navigation Items */}
+            {isAuthenticated && authenticatedNavItems.map((item) => (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={`flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  pathname === item.href
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <item.icon className="w-4 h-4" />
+                {item.label}
+              </Link>
+            ))}
+            
             <ThemeToggle />
+            <WalletSelector />
             <Link href="/demo">
               <Button
                 className="bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-sm"
@@ -130,6 +155,23 @@ export function Navigation({ className, currentPage, setCurrentPage }: Navigatio
                 {item.label}
               </Link>
             ))}
+            
+            {/* Authenticated Navigation Items for Mobile */}
+            {isAuthenticated && authenticatedNavItems.map((item) => (
+              <Link
+                key={item.id}
+                href={item.href}
+                onClick={() => setIsMenuOpen(false)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors ${
+                  pathname === item.href
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <item.icon className="w-4 h-4" />
+                {item.label}
+              </Link>
+            ))}
             <div className="flex items-center space-x-4 px-3 py-2">
               {externalLinks.map((link) => (
                 <a
@@ -144,7 +186,8 @@ export function Navigation({ className, currentPage, setCurrentPage }: Navigatio
                 </a>
               ))}
             </div>
-            <div className="px-3 py-2">
+            <div className="px-3 py-2 space-y-2">
+              <WalletSelector />
               <Link href="/demo" onClick={() => setIsMenuOpen(false)}>
                 <Button
                   className="bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-sm w-full"

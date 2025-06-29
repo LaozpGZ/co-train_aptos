@@ -69,6 +69,39 @@ next-env.d.ts
 # Certificates
 certificates
 
+# Backend specific
+dist/
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# Docker
+.dockerignore
+
+# Aptos specific (if needed at root level)
+.aptos/
+
 # Editor directories and files
 .vscode/
 .idea/

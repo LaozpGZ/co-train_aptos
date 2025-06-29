@@ -23,7 +23,7 @@ import {
   LogOut,
   User,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import {
   Collapsible,
@@ -44,13 +44,25 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useToast } from "./ui/use-toast";
+import { useWalletAuth } from "@/hooks/useWalletAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function WalletSelector(walletSortingOptions: WalletSortingOptions) {
   const { account, connected, disconnect, wallet } = useWallet();
   const { toast } = useToast();
+  const { isLoading, login, logout } = useWalletAuth();
+  const { user, isAuthenticated } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const closeDialog = useCallback(() => setIsDialogOpen(false), []);
+
+  const handleLogin = async () => {
+    await login();
+  };
+
+  const handleLogout = () => {
+    logout();
+  };
 
   const copyAddress = useCallback(async () => {
     if (!account?.address) return;
@@ -69,37 +81,94 @@ export function WalletSelector(walletSortingOptions: WalletSortingOptions) {
     }
   }, [account?.address, toast]);
 
-  return connected ? (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button>
+  // If wallet is connected but user is not authenticated
+  if (connected && account && !isAuthenticated) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground">
           {account?.ansName ||
             truncateAddress(account?.address?.toString()) ||
             "Unknown"}
+        </span>
+        <Button
+          onClick={handleLogin}
+          disabled={isLoading}
+          size="sm"
+        >
+          {isLoading ? 'Signing...' : 'Sign In'}
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={copyAddress} className="gap-2">
-          <Copy className="h-4 w-4" /> Copy address
-        </DropdownMenuItem>
-        {wallet && isAptosConnectWallet(wallet) && (
-          <DropdownMenuItem asChild>
-            <a
-              href={APTOS_CONNECT_ACCOUNT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex gap-2"
-            >
-              <User className="h-4 w-4" /> Account
-            </a>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              Options
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={copyAddress} className="gap-2">
+              <Copy className="h-4 w-4" /> Copy address
+            </DropdownMenuItem>
+            {wallet && isAptosConnectWallet(wallet) && (
+              <DropdownMenuItem asChild>
+                <a
+                  href={APTOS_CONNECT_ACCOUNT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex gap-2"
+                >
+                  <User className="h-4 w-4" /> Account
+                </a>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onSelect={disconnect} className="gap-2">
+              <LogOut className="h-4 w-4" /> Disconnect
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
+  }
+
+  // If user is authenticated
+  if (connected && account && isAuthenticated && user) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button>
+            <User className="h-4 w-4 mr-2" />
+            {user.username}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <div className="px-2 py-1.5 text-sm text-muted-foreground">
+            {account?.ansName ||
+              truncateAddress(account?.address?.toString()) ||
+              "Unknown"}
+          </div>
+          <DropdownMenuItem onSelect={copyAddress} className="gap-2">
+            <Copy className="h-4 w-4" /> Copy address
           </DropdownMenuItem>
-        )}
-        <DropdownMenuItem onSelect={disconnect} className="gap-2">
-          <LogOut className="h-4 w-4" /> Disconnect
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  ) : (
+          {wallet && isAptosConnectWallet(wallet) && (
+            <DropdownMenuItem asChild>
+              <a
+                href={APTOS_CONNECT_ACCOUNT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex gap-2"
+              >
+                <User className="h-4 w-4" /> Account
+              </a>
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem onSelect={handleLogout} className="gap-2">
+            <LogOut className="h-4 w-4" /> Sign Out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  // Default wallet selector for non-connected state
+  return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         <Button>Connect a Wallet</Button>
