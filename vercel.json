@@ -1,6 +1,4 @@
 {
-  "buildCommand": "echo 'Using pre-built files'",
-  "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "pnpm install --frozen-lockfile",
   "functions": {

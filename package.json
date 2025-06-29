@@ -3,15 +3,14 @@
   "version": "4.1.3",
   "private": true,
   "license": "Apache-2.0",
+  "packageManager": "pnpm@10.0.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "clean": "turbo run clean && rm -rf node_modules",
-    "format": "prettier --write './**/*.{ts,tsx,js,jsx,json,md,html,css}'",
-    "deploy:prebuild": "./scripts/deploy-with-build.sh",
-    "build:clean": "rm -rf .next && pnpm run build"
+    "format": "prettier --write './**/*.{ts,tsx,js,jsx,json,md,html,css}'"
   },
   "dependencies": {
     "@aptos-labs/derived-wallet-ethereum": "0.3.0",
