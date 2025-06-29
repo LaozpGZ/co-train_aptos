@@ -16,7 +16,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { TrainingModule } from './modules/training/training.module';
 import { ContributorsModule } from './modules/contributors/contributors.module';
-// import { BlockchainModule } from './modules/blockchain/blockchain.module';
+import { BlockchainModule } from './modules/blockchain/blockchain.module';
 // import { ComputeModule } from './modules/compute/compute.module';
 // import { AnalyticsModule } from './modules/analytics/analytics.module';
 // import { NotificationsModule } from './modules/notifications/notifications.module';
@@ -67,7 +67,7 @@ import { AppService } from './app.service';
     UsersModule,
     TrainingModule,
     ContributorsModule,
-    // BlockchainModule,
+    BlockchainModule,
     // ComputeModule,
     // AnalyticsModule,
     // NotificationsModule,
