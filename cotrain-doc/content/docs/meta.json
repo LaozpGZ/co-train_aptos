@@ -1,0 +1,12 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "quickStart",
+    "RoadMap",
+    "Development",
+    "Tokenomics",
+        "SDK",
+        "API"
+  ]
+}

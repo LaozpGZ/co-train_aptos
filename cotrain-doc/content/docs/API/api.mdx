@@ -1,0 +1,138 @@
+---
+title: "CoTrain API Reference"
+description: "REST API for querying user contributions and model training progress."
+full: true
+---
+
+# 🧠 CoTrain API Reference
+
+This API allows you to query:
+
+- 👤 Training contribution of a specific user (by wallet address)
+- 🧪 Real-time progress of a model training job (by model ID)
+
+All endpoints return JSON and are accessible via `https://api.cotrain.network/v1`.
+
+---
+
+## 🔐 Authentication
+
+You must include your API key in the `Authorization` header for authenticated endpoints:
+
+```http
+Authorization: Bearer <your-api-key>
+```
+
+---
+
+## 📊 Get User Contribution
+
+### `GET /users/{wallet_address}/contribution`
+
+Fetch the total contribution (compute time, job count, rewards) of a specific GPU provider or contributor by their wallet address.
+
+### 🔧 Parameters
+
+| Name           | Type   | Required | Description                      |
+|----------------|--------|----------|----------------------------------|
+| wallet_address | string | ✅ Yes   | Aptos wallet address of user     |
+
+### 📥 Request
+
+```http
+GET /users/0xabc123.../contribution
+Host: api.cotrain.network
+Authorization: Bearer <your-api-key>
+```
+
+### 📤 Response
+
+```json
+{
+  "wallet_address": "0xabc123...",
+  "total_gpu_hours": 128.5,
+  "jobs_completed": 42,
+  "ctn_earned": 962.75,
+  "ranking_percentile": 0.12
+}
+```
+
+---
+
+## 🚧 Get Model Training Progress
+
+### `GET /models/{model_id}/progress`
+
+Returns the training progress of a model, including training phase, percent completion, total compute contributed, and contributors list.
+
+### 🔧 Parameters
+
+| Name      | Type   | Required | Description       |
+|-----------|--------|----------|-------------------|
+| model_id  | string | ✅ Yes   | ID of the model   |
+
+### 📥 Request
+
+```http
+GET /models/llama2-42b/progress
+Host: api.cotrain.network
+Authorization: Bearer <your-api-key>
+```
+
+### 📤 Response
+
+```json
+{
+  "model_id": "llama2-42b",
+  "status": "training",
+  "percent_complete": 73.4,
+  "estimated_completion_time": "2025-07-28T12:00:00Z",
+  "total_gpu_hours": 18422.3,
+  "contributors": [
+    { "wallet": "0xabc123...", "gpu_hours": 152.5 },
+    { "wallet": "0xdef456...", "gpu_hours": 87.3 }
+  ]
+}
+```
+
+---
+
+## 📈 Example Integration in Python
+
+```python
+import requests
+
+API_KEY = "your-api-key"
+headers = {"Authorization": f"Bearer {API_KEY}"}
+
+# Query user contribution
+wallet = "0xabc123..."
+resp = requests.get(f"https://api.cotrain.network/v1/users/{wallet}/contribution", headers=headers)
+print(resp.json())
+
+# Query model training progress
+model_id = "llama2-42b"
+resp = requests.get(f"https://api.cotrain.network/v1/models/{model_id}/progress", headers=headers)
+print(resp.json())
+```
+
+---
+
+## 📘 Notes
+
+- Response values may be cached for a few seconds to reduce load.
+- Model `status` can be: `"pending"`, `"training"`, `"completed"`, or `"failed"`.
+- Percentile ranking is based on GPU hours across the network.
+
+---
+
+## 🧩 Coming Soon
+
+- `/models` listing API
+- `/jobs` historical activity API
+- Webhook subscription for job completion events
+
+---
+
+[Back to SDK](../sdk) | [Tokenomics](../tokenomics) | [Governance](../governance)
+

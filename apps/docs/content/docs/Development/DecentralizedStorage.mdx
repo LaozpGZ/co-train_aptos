@@ -1,0 +1,114 @@
+---
+title: "Decentralized Storage with Aptos & Shelby"
+description: "How CoTrain leverages Aptos chain storage and Shelby to store and transport AI models and training data."
+full: true
+---
+
+# 🧬 Decentralized Storage with Aptos & Shelby
+
+In CoTrain, we believe that **data provenance, integrity, and accessibility** are essential pillars of decentralized AI development. To achieve this, we leverage the **Aptos blockchain's native storage features** and the powerful capabilities introduced in [Shelby](https://aptosfoundation.org/currents/shelby-a-new-era-of-value-creation-for-web3), a new decentralized object storage framework launched by Aptos Foundation.
+
+---
+
+## 🛠️ Why Chain Storage for AI?
+
+AI development traditionally relies on centralized cloud storage. CoTrain moves away from this model and instead:
+
+- Publishes model checkpoints and hashes **on-chain**.
+- Stores metadata and integrity proofs directly in **Move modules**.
+- Distributes datasets via **content-addressed references**.
+- Ensures verifiable and reproducible model builds via **chain commits**.
+
+---
+
+## 🔐 Enter Shelby: Decentralized Object Layer
+
+### What is Shelby?
+
+Shelby is a decentralized object storage protocol on Aptos that enables storing **large blobs**, including AI models and datasets, in a **secure, composable, and chain-native** manner.
+
+Features we use:
+
+- 🧾 **Immutable Object Publishing**: AI models are published with signatures and timestamps.
+- 🔎 **Zero-Knowledge Integrity**: Dataset authenticity can be verified via ZK proofs.
+- 📦 **Compression-aware Streaming**: Faster model delivery to GPU nodes via partial range fetch.
+- 🌍 **Content Replication**: Nodes cache objects locally while maintaining canonical roots.
+
+---
+
+## 📦 CoTrain Storage Flow
+
+```mermaid
+graph TD
+  A[Local Contributor] -->|Upload Dataset| B[Object Uploader]
+  B -->|Store CID + Metadata| C[Shelby Storage Module (on Aptos)]
+  C -->|Publish Event| D[Smart Contract Listener]
+  D -->|Trigger| E[GPU Node Training]
+  E -->|Write Checkpoint CID| C
+  C -->|Expose State| F[Frontend/API/SDK]
+```
+
+> Every model checkpoint and dataset version is linked by a CID and published immutably via Aptos Move modules.
+
+---
+
+## 🔗 Sample On-chain Metadata Format (Move Struct)
+
+```move
+struct ModelInfo has key, store {
+    cid: vector<u8>,
+    owner: address,
+    version: u64,
+    timestamp: u64,
+    size_bytes: u64,
+    integrity_hash: vector<u8>,
+}
+```
+
+These structs are emitted as `resource` types and updated through permissioned modules. Contributors and verifiers can fetch this data through CoTrain SDK or directly via Aptos indexers.
+
+---
+
+## 🌐 SDK Usage Example
+
+```python
+from cotrain_sdk import ModelStorage
+
+model = ModelStorage(model_id="llama2-42b")
+
+metadata = model.fetch_onchain_metadata()
+print("CID:", metadata.cid)
+print("Integrity Hash:", metadata.integrity_hash)
+print("Uploaded by:", metadata.owner)
+```
+
+---
+
+## 🧩 Advantages of Aptos x CoTrain Integration
+
+| Feature               | Centralized AI | CoTrain on Aptos          |
+|-----------------------|----------------|----------------------------|
+| Ownership             | Vendor-locked  | Wallet-based provenance   |
+| Data Verification     | Not verifiable | Cryptographic proof        |
+| Interoperability      | Low            | Move modules / composable |
+| Public Auditability   | None           | Fully on-chain             |
+| Censorship Resistance | No             | Yes                        |
+
+---
+
+## 📜 Reference
+
+- 🔗 [Shelby: A New Era of Value Creation for Web3](https://aptosfoundation.org/currents/shelby-a-new-era-of-value-creation-for-web3)
+- 🧠 [Aptos Move Documentation](https://aptos.dev)
+- 🧱 [Aptos SDKs and Indexers](https://github.com/aptos-labs)
+
+---
+
+## 🚀 Next Steps
+
+- Integrate **zero-knowledge proofs** for model lineage.
+- Enable **user-owned model registries** via Move.
+- Explore **decentralized inference outputs** stored on Aptos.
+
+[Back to SDK](../sdk) | [Tokenomics](../tokenomics) | [Storage Voting](../governance)
+```

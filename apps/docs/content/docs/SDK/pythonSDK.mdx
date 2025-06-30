@@ -1,0 +1,218 @@
+---
+title: "CoTrain Python SDK — Complete Reference"
+description: "Full conceptual Python SDK for interacting with CoTrain's decentralized AI training platform."
+full: true
+---
+
+# 🚀 CoTrain Python SDK — Complete Reference
+
+This document provides a **full conceptual Python SDK** designed to interact with CoTrain — a decentralized AI training platform built on Aptos and powered by CTN tokens.
+
+---
+
+## 📦 Installation
+
+```bash
+pip install cotrain-sdk
+```
+
+---
+
+## 🧰 Quickstart Example
+
+```python
+from cotrain_sdk import CoTrainClient
+
+# Initialize CoTrain client
+client = CoTrainClient(
+    api_key="YOUR_API_KEY",
+    endpoint="https://api.cotrain.network/v1",
+    wallet_path="~/.ctn/wallet.json"
+)
+
+# List available training jobs
+available_jobs = client.jobs.list_available()
+print("Available Jobs:", available_jobs)
+
+# Submit a new training job
+job_id = client.jobs.submit_task(
+    docker_image="cotrain/llama-train:latest",
+    model_path="./models/llama",
+    dataset_url="https://huggingface.co/datasets/wiki.zip",
+    requirements={
+        "gpu": 1,
+        "memory_gb": 16,
+        "duration_hours": 4
+    }
+)
+print(f"Submitted job ID: {job_id}")
+
+# Check status of a job
+status = client.jobs.status(job_id)
+print("Job Status:", status)
+
+# Claim earned CTN rewards
+tx_hash = client.wallet.claim_rewards()
+print("Claim transaction hash:", tx_hash)
+```
+
+---
+
+## 📁 SDK Structure Overview
+
+- **`CoTrainClient`** — main entry point  
+- **`JobManager`** — manage training job submission and status  
+- **`ModelManager`** — upload/download models (conceptual)  
+- **`WalletManager`** — interact with Aptos wallet and CTN token  
+- **`config.py`** — configuration handling  
+- **`exceptions.py`** — custom exceptions  
+- **`utils.py`** — helpers
+
+---
+
+## 🧩 Core Classes
+
+### `CoTrainClient`
+
+```python
+class CoTrainClient:
+    def __init__(self, api_key: str, endpoint: str, wallet_path: str):
+        self.api_key = api_key
+        self.endpoint = endpoint
+        self.wallet = self._load_wallet(wallet_path)
+        self.jobs = JobManager(self)
+        self.models = ModelManager(self)
+        self.wallet = WalletManager(self)
+
+    def _load_wallet(self, wallet_path):
+        # Loads wallet file, decrypts private keys, etc.
+        # Placeholder implementation
+        with open(wallet_path, 'r') as f:
+            return f.read()
+```
+
+---
+
+### `JobManager`
+
+```python
+import requests
+
+class JobManager:
+    def __init__(self, client: CoTrainClient):
+        self.client = client
+
+    def submit_task(self, docker_image: str, model_path: str, dataset_url: str, requirements: dict) -> str:
+        data = {
+            "docker_image": docker_image,
+            "dataset_url": dataset_url,
+            "requirements": requirements
+        }
+        files = {"model": open(model_path, "rb")}
+        headers = {"Authorization": f"Bearer {self.client.api_key}"}
+        response = requests.post(f"{self.client.endpoint}/jobs", data=data, files=files, headers=headers)
+        response.raise_for_status()
+        return response.json().get("job_id")
+
+    def status(self, job_id: str) -> dict:
+        headers = {"Authorization": f"Bearer {self.client.api_key}"}
+        response = requests.get(f"{self.client.endpoint}/jobs/{job_id}", headers=headers)
+        response.raise_for_status()
+        return response.json()
+
+    def list_available(self) -> list:
+        response = requests.get(f"{self.client.endpoint}/jobs/available")
+        response.raise_for_status()
+        return response.json()
+```
+
+---
+
+### `ModelManager` (Conceptual)
+
+```python
+class ModelManager:
+    def __init__(self, client: CoTrainClient):
+        self.client = client
+
+    def upload_model(self, model_path: str, metadata: dict) -> str:
+        files = {"model_file": open(model_path, "rb")}
+        headers = {"Authorization": f"Bearer {self.client.api_key}"}
+        response = requests.post(f"{self.client.endpoint}/models", data=metadata, files=files, headers=headers)
+        response.raise_for_status()
+        return response.json().get("model_id")
+
+    def download_model(self, model_id: str, save_path: str) -> None:
+        headers = {"Authorization": f"Bearer {self.client.api_key}"}
+        response = requests.get(f"{self.client.endpoint}/models/{model_id}", headers=headers, stream=True)
+        response.raise_for_status()
+        with open(save_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+```
+
+---
+
+### `WalletManager`
+
+```python
+from aptos_sdk.account import Account
+from aptos_sdk.client import RestClient
+
+class WalletManager:
+    def __init__(self, client: CoTrainClient):
+        self.client = client
+        self.account = self._load_account()
+
+    def _load_account(self) -> Account:
+        # This should load the private key securely from client's wallet data
+        # Placeholder for actual implementation:
+        private_key = "your_private_key_here"
+        return Account.load_key(private_key)
+
+    def claim_rewards(self) -> str:
+        rest_client = RestClient("https://fullnode.mainnet.aptoslabs.com")
+        payload = {
+            "function": "0x1::reward::claim",
+            "type_arguments": [],
+            "arguments": []
+        }
+        tx_hash = rest_client.submit_transaction(sender=self.account, payload=payload)
+        return tx_hash
+```
+
+---
+
+## 🔗 Hypothetical REST API Endpoints
+
+| Method | Endpoint            | Description                  |
+|--------|---------------------|------------------------------|
+| POST   | `/jobs`             | Submit a new training job     |
+| GET    | `/jobs/:id`         | Get job status                |
+| GET    | `/jobs/available`   | List available jobs           |
+| POST   | `/models`           | Upload a model                |
+| GET    | `/models/:id`       | Download a model              |
+| POST   | `/wallet/claim`     | Claim CTN rewards             |
+
+---
+
+## 🔮 Future Enhancements
+
+- Async support with `aiohttp`  
+- WebSocket or event subscriptions for real-time job updates  
+- Integration with NFT model registry and CTN staking contracts  
+- Detailed error handling and retry logic  
+- CLI tool wrapping the SDK  
+
+---
+
+> **Note:** This SDK is a conceptual draft designed to illustrate how developers might interact with the CoTrain ecosystem via Python.
+
+---
+
+## 🙌 Get Started
+
+Ready to contribute to decentralized AI training?  
+Start by installing the SDK and connecting your GPU node or wallet!
+
+[CoTrain Quickstart](../quickstart) | [Tokenomics](../tokenomics) | [Governance & DAO](../governance)
