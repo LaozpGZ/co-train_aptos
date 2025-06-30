@@ -1,0 +1,120 @@
+---
+title: "Quickstart Guide"
+description: "Start contributing to CoTrain from any system or with Python."
+full: true
+---
+
+# 🚀 CoTrain Quickstart
+
+Welcome to **CoTrain** — a decentralized AI training network that empowers everyone to contribute compute and co-create state-of-the-art AI.
+
+Whether you're running Linux, macOS, Windows, or coding in Python, follow the steps below to get started.
+
+---
+
+## 🌍 Requirements
+
+- ✅ At least one **NVIDIA GPU**
+- ✅ **Docker** (for system nodes)
+- ✅ Or Python ≥ 3.8 (for SDK users)
+- ✅ A [CoTrain account](https://join.cotrain.ai)
+
+---
+
+## 💻 Docker Start (System-based)
+
+### 🐧 Linux
+
+```bash
+docker run -d \
+  --gpus all \
+  --restart unless-stopped \
+  --name cotrain-node \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  cotrain/node-agent:latest
+```
+
+### 🍎 macOS
+
+```bash
+docker run -d \
+  --name cotrain-node \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  cotrain/node-agent:latest
+```
+
+> ⚠️ Note: macOS has limited GPU passthrough. Consider using a Linux server or cloud node.
+
+### 🪟 Windows (WSL2)
+
+```powershell
+# Inside WSL2 terminal:
+docker run -d --gpus all --restart unless-stopped --name cotrain-node `
+-v /var/run/docker.sock:/var/run/docker.sock cotrain/node-agent:latest
+```
+
+### 🔐 Authenticate your node
+
+```bash
+docker exec -it cotrain-node cotrain login
+```
+
+Then paste your API token from [dashboard.cotrain.ai](https://dashboard.cotrain.ai)
+
+---
+
+## 🐍 Python SDK Start (Code-based)
+
+For developers who want to run jobs via Python:
+
+### 1. Install the SDK
+
+```bash
+pip install cotrain-sdk
+```
+
+### 2. Authenticate
+
+```python
+from cotrain import CoTrain
+
+client = CoTrain(api_key="your_api_key_here")
+client.ping()
+```
+
+### 3. Submit a Job
+
+```python
+from cotrain import submit_job
+
+submit_job(
+    job_name="my-first-job",
+    image="cotrain/sample:latest",
+    command="python train.py",
+    resources={"gpus": 1, "memory": "8GiB"},
+)
+```
+
+> 📘 See the [full SDK reference](https://docs.cotrain.ai/sdk) for more examples.
+
+---
+
+## 📊 Monitor & Rewards
+
+Visit your [Dashboard](https://dashboard.cotrain.ai) to:
+
+- View connected nodes
+- Join projects
+- Track your credits
+
+---
+
+## 🙋 Need Help?
+
+- 💬 Join [CoTrain Discord](https://discord.gg/cotrain)
+- 📖 Browse [Full Docs](https://docs.cotrain.ai)
+- ❓ Check the [FAQ](https://docs.cotrain.ai/faq)
+
+---
+
+Together, we CoTrain. 🧠⚡
