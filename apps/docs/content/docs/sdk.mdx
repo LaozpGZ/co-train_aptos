@@ -1,0 +1,1719 @@
+---
+title: "SDK"
+description: "Comprehensive guide to CoTrain SDKs for Python, JavaScript, and other languages."
+full: true
+---
+
+# 🛠️ CoTrain SDK
+
+Welcome to the CoTrain SDK documentation! Our SDKs provide easy-to-use interfaces for interacting with the CoTrain decentralized AI training network across multiple programming languages.
+
+---
+
+## 🌟 Overview
+
+The CoTrain SDK enables developers to:
+
+- 🚀 **Submit training jobs** to the decentralized network
+- 📊 **Monitor training progress** in real-time
+- 💰 **Manage CTN tokens** and payments
+- 🔒 **Configure security settings** for Byzantine fault tolerance
+- 📈 **Access performance metrics** and analytics
+- 🤖 **Deploy and serve models** on the network
+- 🗳️ **Participate in governance** and voting
+
+### Supported Languages
+
+| Language | Status | Version | Documentation |
+|----------|--------|---------|---------------|
+| **Python** | ✅ Stable | 1.0.0 | [Python SDK](#python-sdk) |
+| **JavaScript/TypeScript** | ✅ Stable | 1.0.0 | [JS/TS SDK](#javascript-typescript-sdk) |
+| **Rust** | 🚧 Beta | 0.8.0 | [Rust SDK](#rust-sdk) |
+| **Go** | 🚧 Beta | 0.7.0 | [Go SDK](#go-sdk) |
+| **Java** | 📋 Planned | - | Coming Q2 2025 |
+| **C++** | 📋 Planned | - | Coming Q3 2025 |
+
+---
+
+## 🐍 Python SDK
+
+### Installation
+
+```bash
+# Install from PyPI
+pip install cotrain-sdk
+
+# Install with optional dependencies
+pip install cotrain-sdk[torch,tensorflow,monitoring]
+
+# Install development version
+pip install git+https://github.com/cotrain-ai/cotrain-python-sdk.git
+```
+
+### Quick Start
+
+```python
+from cotrain import CoTrainClient, TrainingConfig, SecurityConfig
+import torch
+import torch.nn as nn
+import asyncio
+
+# Initialize client
+client = CoTrainClient(
+    base_url="http://localhost:3000/api",
+    auth_token="your-jwt-token"
+)
+
+# Register a new user
+async def register_user():
+    user_data = {
+        "email": "user@example.com",
+        "password": "securePassword123",
+        "username": "myusername",
+        "wallet_address": "0x1::account::address"
+    }
+    
+    response = await client.auth.register(user_data)
+    print(f"User registered: {response['user']['id']}")
+    return response
+
+# Login and get access token
+async def login():
+    credentials = {
+        "email": "user@example.com",
+        "password": "securePassword123"
+    }
+    
+    response = await client.auth.login(credentials)
+    client.set_auth_token(response['access_token'])
+    print(f"Logged in as: {response['user']['username']}")
+    return response
+
+# Wallet-based authentication
+async def wallet_login():
+    wallet_data = {
+        "wallet_address": "0x1::account::address",
+        "signature": "wallet_signature",
+        "message": "Login to CoTrain"
+    }
+    
+    response = await client.auth.wallet_login(wallet_data)
+    client.set_auth_token(response['access_token'])
+    print(f"Wallet login successful: {response['user']['username']}")
+    return response
+
+# Check connection
+status = client.get_network_status()
+print(f"Connected to {status.network_name} with {status.active_nodes} nodes")
+
+# Define your model
+class SimpleTransformer(nn.Module):
+    def __init__(self, vocab_size, d_model, nhead, num_layers):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, d_model)
+        self.transformer = nn.Transformer(d_model, nhead, num_layers)
+        self.fc = nn.Linear(d_model, vocab_size)
+    
+    def forward(self, x):
+        x = self.embedding(x)
+        x = self.transformer(x, x)
+        return self.fc(x)
+
+# Create a training session
+async def create_training_session():
+    training_config = {
+        "name": "My Training Session",
+        "description": "Training a transformer model",
+        "model_config": {
+            "architecture": "transformer",
+            "parameters": {
+                "layers": 12,
+                "hidden_size": 768,
+                "attention_heads": 12
+            }
+        },
+        "dataset_url": "s3://bucket/dataset",
+        "epochs": 3,
+        "batch_size": 32,
+        "learning_rate": 0.0001,
+        "max_participants": 10,
+        "reward_per_epoch": 100
+    }
+    
+    session = await client.training.create_session(training_config)
+    print(f"Training session created: {session['id']}")
+    return session
+
+# Monitor training sessions
+async def get_training_sessions():
+    # Get all training sessions with pagination
+    sessions = await client.training.get_sessions(
+        page=1,
+        limit=10,
+        search="transformer"
+    )
+    
+    for session in sessions['data']:
+        print(f"Session: {session['name']} - Progress: {session['progress']}%")
+    
+    # Get user's own training sessions
+    my_sessions = await client.training.get_my_sessions(
+        page=1,
+        limit=10
+    )
+    
+    # Get training statistics
+    stats = await client.training.get_statistics()
+    print(f"Total sessions: {stats['total_sessions']}")
+    print(f"Active sessions: {stats['active_sessions']}")
+    
+    return sessions
+
+# Create contributor profile
+async def create_contributor_profile():
+    contributor_data = {
+        "hardware_specs": {
+            "gpu_model": "NVIDIA RTX 4090",
+            "gpu_memory_gb": 24,
+            "cpu_cores": 16,
+            "ram_gb": 64,
+            "storage_gb": 2000,
+            "network_speed_mbps": 1000
+        },
+        "availability_hours": 8,
+        "hourly_rate_ctn": 10,
+        "location": "US-West",
+        "bio": "Experienced ML engineer with high-end hardware"
+    }
+    
+    profile = await client.contributors.create_profile(contributor_data)
+    print(f"Contributor profile created: {profile['id']}")
+    return profile
+
+# Get available contributors
+async def get_contributors():
+    # Get all contributors
+    contributors = await client.contributors.get_all(
+        page=1,
+        limit=20,
+        search="GPU"
+    )
+    
+    # Get top contributors by reputation
+    top_contributors = await client.contributors.get_top(limit=10)
+    
+    # Get available contributors for training
+    available = await client.contributors.get_available({
+        "min_gpu_memory": "8GB",
+        "min_bandwidth": "100Mbps"
+    })
+    
+    # Get contributor statistics
+    stats = await client.contributors.get_statistics()
+    print(f"Total contributors: {stats['total_contributors']}")
+    print(f"Online contributors: {stats['online_contributors']}")
+    
+    return contributors
+
+# Run the example
+async def main():
+    await register_user()
+    await login()
+    await wallet_login()
+    await create_training_session()
+    await get_training_sessions()
+    await create_contributor_profile()
+    await get_contributors()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### Advanced Features
+
+#### WebSocket Real-time Updates
+
+```typescript
+import { CoTrainWebSocket } from '@cotrain/sdk';
+
+// Initialize WebSocket connection
+const ws = new CoTrainWebSocket({
+  url: 'ws://localhost:3001',
+  authToken: 'your-jwt-token'
+});
+
+// Listen for training progress updates
+ws.on('training_progress', (data) => {
+  console.log(`Training Progress:`, {
+    sessionId: data.session_id,
+    progress: data.progress,
+    currentEpoch: data.current_epoch,
+    totalEpochs: data.total_epochs,
+    loss: data.loss,
+    accuracy: data.accuracy
+  });
+});
+
+// Listen for participant updates
+ws.on('participant_joined', (data) => {
+  console.log(`New participant joined session ${data.session_id}:`, data.participant);
+});
+
+// Listen for blockchain events
+ws.on('blockchain_event', (data) => {
+  console.log(`Blockchain event:`, {
+    type: data.event_type,
+    transactionHash: data.transaction_hash,
+    blockNumber: data.block_number
+  });
+});
+
+// Subscribe to specific session updates
+ws.emit('subscribe_training', {
+  session_id: 'your-session-id'
+});
+
+// Subscribe to contributor notifications
+ws.emit('subscribe_contributor', {
+  contributor_id: 'your-contributor-id'
+});
+```
+
+#### Blockchain Integration
+
+```python
+from cotrain.blockchain import AptosClient
+from cotrain.contracts import TrainingContract
+
+# Initialize Aptos blockchain client
+aptos_client = AptosClient(
+    node_url="https://fullnode.mainnet.aptoslabs.com/v1",
+    private_key="your-private-key"
+)
+
+# Create training session on blockchain
+training_contract = TrainingContract(aptos_client)
+
+# Deploy training session
+session_data = {
+    "name": "Transformer Training Session",
+    "description": "Large language model training",
+    "max_participants": 20,
+    "reward_per_participant": 50,
+    "duration_hours": 24,
+    "model_hash": "0x1234567890abcdef",
+    "dataset_hash": "0xfedcba0987654321"
+}
+
+tx_hash = await training_contract.create_session(session_data)
+print(f"Training session created on blockchain: {tx_hash}")
+
+# Register as participant
+participant_data = {
+    "session_id": "session_001",
+    "compute_power": 1000,
+    "stake_amount": 100
+}
+
+participant_tx = await training_contract.register_participant(participant_data)
+print(f"Registered as participant: {participant_tx}")
+
+# Monitor blockchain events
+for event in training_contract.listen_events():
+    if event.type == "SessionCreated":
+        print(f"New session created: {event.session_id}")
+    elif event.type == "ParticipantRegistered":
+        print(f"New participant: {event.participant_address}")
+    elif event.type == "RewardDistributed":
+        print(f"Rewards distributed: {event.amount} CTN")
+    
+    def training_step(self, batch, batch_idx):
+        """Custom training step with advanced security"""
+        inputs, targets = batch
+        
+        # Forward pass
+        outputs = self.model(inputs)
+        loss = self.criterion(outputs, targets)
+        
+        # Backward pass
+        self.optimizer.zero_grad()
+        loss.backward()
+        
+        # Get gradients
+        gradients = [param.grad.clone() for param in self.model.parameters()]
+        
+        # Secure gradient aggregation
+        aggregated_gradients = self.gradient_aggregator.aggregate(
+            gradients,
+            worker_id=self.worker_id,
+            round_number=self.current_round
+        )
+        
+        # Byzantine detection
+        is_malicious = self.byzantine_detector.detect_anomaly(
+            gradients,
+            aggregated_gradients
+        )
+        
+        if not is_malicious:
+            # Apply aggregated gradients
+            for param, grad in zip(self.model.parameters(), aggregated_gradients):
+                param.grad = grad
+            
+            self.optimizer.step()
+        
+        return {
+            "loss": loss.item(),
+            "is_malicious": is_malicious,
+            "gradient_norm": torch.norm(torch.cat([g.flatten() for g in gradients]))
+        }
+    
+    def validation_step(self, batch, batch_idx):
+        """Validation step"""
+        inputs, targets = batch
+        
+        with torch.no_grad():
+            outputs = self.model(inputs)
+            loss = self.criterion(outputs, targets)
+            
+            # Calculate accuracy
+            predictions = torch.argmax(outputs, dim=-1)
+            accuracy = (predictions == targets).float().mean()
+        
+        return {
+            "val_loss": loss.item(),
+            "val_accuracy": accuracy.item()
+        }
+
+# Use custom trainer
+trainer = CustomTrainer(model, optimizer, criterion)
+
+# Submit with custom trainer
+job = client.submit_custom_training(
+    trainer=trainer,
+    dataset_path="s3://my-bucket/data",
+    max_cost_ctn=2000
+)
+```
+
+#### Error Handling and Retry Logic
+
+```typescript
+import { CoTrainClient, CoTrainError, RetryConfig } from '@cotrain/sdk';
+
+// Initialize client with retry configuration
+const client = new CoTrainClient({
+  baseUrl: 'http://localhost:3001/api',
+  authToken: 'your-jwt-token',
+  retryConfig: {
+    maxRetries: 3,
+    retryDelay: 1000,
+    exponentialBackoff: true
+  }
+});
+
+// Handle specific error types
+const handleTrainingSession = async () => {
+  try {
+    const session = await client.training.createSession(trainingConfig);
+    return session;
+  } catch (error) {
+    if (error instanceof CoTrainError) {
+      switch (error.code) {
+        case 'INSUFFICIENT_BALANCE':
+          console.error('Not enough CTN tokens for training');
+          // Redirect to token purchase
+          break;
+        case 'TRAINING_SESSION_NOT_FOUND':
+          console.error('Training session does not exist');
+          break;
+        case 'BLOCKCHAIN_TRANSACTION_FAILED':
+          console.error('Blockchain transaction failed:', error.details);
+          // Retry with different gas settings
+          break;
+        default:
+          console.error('Unknown error:', error.message);
+      }
+    } else {
+      console.error('Network or unexpected error:', error);
+    }
+    throw error;
+  }
+};
+
+// Batch operations with error handling
+const batchCreateSessions = async (configs: TrainingConfig[]) => {
+  const results = await Promise.allSettled(
+    configs.map(config => client.training.createSession(config))
+  );
+  
+  const successful = results
+    .filter(result => result.status === 'fulfilled')
+    .map(result => (result as PromiseFulfilledResult<any>).value);
+  
+  const failed = results
+    .filter(result => result.status === 'rejected')
+    .map(result => (result as PromiseRejectedResult).reason);
+  
+  console.log(`Created ${successful.length} sessions, ${failed.length} failed`);
+  return { successful, failed };
+};
+```
+
+#### Performance Monitoring and Analytics
+
+```python
+from cotrain.monitoring import PerformanceMonitor
+from cotrain.analytics import TrainingAnalytics
+
+# Initialize performance monitor
+monitor = PerformanceMonitor(
+    client=client,
+    session_id="your-session-id",
+    metrics_interval=30  # seconds
+)
+
+# Start monitoring training session
+async def monitor_training_session(session_id: str):
+    analytics = TrainingAnalytics(client)
+    
+    # Get real-time metrics
+    metrics = await analytics.get_session_metrics(session_id)
+    print(f"Session Metrics:")
+    print(f"  Progress: {metrics['progress']}%")
+    print(f"  Participants: {metrics['participants_count']}")
+    print(f"  Average Loss: {metrics['average_loss']:.4f}")
+    print(f"  Estimated Completion: {metrics['estimated_completion']}")
+    
+    # Get contributor performance
+    contributors = await analytics.get_contributor_performance(session_id)
+    for contributor in contributors:
+        print(f"Contributor {contributor['id']}:")
+        print(f"  Reputation: {contributor['reputation_score']}")
+        print(f"  Uptime: {contributor['uptime_percentage']}%")
+        print(f"  Contribution Quality: {contributor['quality_score']}")
+    
+    # Monitor for anomalies
+    anomalies = await analytics.detect_anomalies(session_id)
+    if anomalies:
+        print("Anomalies detected:")
+        for anomaly in anomalies:
+            print(f"  - {anomaly['type']}: {anomaly['description']}")
+    
+    return metrics
+
+# Set up real-time alerts
+class TrainingAlerts:
+    def __init__(self, client: CoTrainClient):
+        self.client = client
+        self.ws = client.websocket.connect()
+        self.setup_alerts()
+    
+    def setup_alerts(self):
+        self.ws.on('training_stalled', self.handle_training_stalled)
+        self.ws.on('participant_dropped', self.handle_participant_dropped)
+        self.ws.on('quality_degradation', self.handle_quality_degradation)
+    
+    def handle_training_stalled(self, data):
+        print(f"⚠️ Training stalled in session {data['session_id']}")
+        print(f"   Reason: {data['reason']}")
+        # Implement recovery logic
+    
+    def handle_participant_dropped(self, data):
+        print(f"📉 Participant dropped from session {data['session_id']}")
+        print(f"   Participant: {data['participant_id']}")
+        print(f"   Remaining participants: {data['remaining_count']}")
+    
+    def handle_quality_degradation(self, data):
+        print(f"🔍 Quality degradation detected in session {data['session_id']}")
+        print(f"   Quality score: {data['quality_score']}")
+        print(f"   Threshold: {data['threshold']}")
+
+# Usage
+alerts = TrainingAlerts(client)
+metrics = await monitor_training_session("your-session-id")
+```
+
+---
+
+## 🌐 JavaScript/TypeScript SDK
+
+### Installation
+
+```bash
+# Install with npm
+npm install @cotrain/sdk
+
+# Install with yarn
+yarn add @cotrain/sdk
+
+# Install with pnpm
+pnpm add @cotrain/sdk
+```
+
+### Quick Start
+
+```typescript
+import { CoTrainClient } from '@cotrain/sdk';
+
+// Initialize client
+const client = new CoTrainClient({
+  baseUrl: 'http://localhost:3000/api',
+  authToken: 'your-jwt-token'
+});
+
+// Register a new user
+const registerUser = async () => {
+  const userData = {
+    email: 'user@example.com',
+    password: 'securePassword123',
+    username: 'myusername',
+    wallet_address: '0x1::account::address'
+  };
+  
+  const response = await client.auth.register(userData);
+  console.log(`User registered: ${response.user.id}`);
+  return response;
+};
+
+// Login and get access token
+const login = async () => {
+  const credentials = {
+    email: 'user@example.com',
+    password: 'securePassword123'
+  };
+  
+  const response = await client.auth.login(credentials);
+  client.setAuthToken(response.access_token);
+  console.log(`Logged in as: ${response.user.username}`);
+  return response;
+};
+
+// Create a training session
+const createTrainingSession = async () => {
+  const trainingConfig = {
+    name: 'My Training Session',
+    description: 'Training a transformer model',
+    model_config: {
+      architecture: 'transformer',
+      parameters: {
+        layers: 12,
+        hidden_size: 768,
+        attention_heads: 12
+      }
+    },
+    dataset_url: 's3://bucket/dataset',
+    epochs: 3,
+    batch_size: 32,
+    learning_rate: 0.0001,
+    max_participants: 10,
+    reward_per_epoch: 100
+  };
+  
+  const session = await client.training.createSession(trainingConfig);
+  console.log(`Training session created: ${session.id}`);
+  return session;
+};
+
+// Create contributor profile
+const createContributorProfile = async () => {
+  const contributorData = {
+    hardware_specs: {
+      gpu_model: 'NVIDIA RTX 4090',
+      gpu_memory_gb: 24,
+      cpu_cores: 16,
+      ram_gb: 64,
+      storage_gb: 2000,
+      network_speed_mbps: 1000
+    },
+    availability_hours: 8,
+    hourly_rate_ctn: 10,
+    location: 'US-West',
+    bio: 'Experienced ML engineer with high-end hardware'
+  };
+  
+  const profile = await client.contributors.createProfile(contributorData);
+  console.log(`Contributor profile created: ${profile.id}`);
+  return profile;
+};
+
+// Get contributors information
+const getContributors = async () => {
+  // Get all contributors with pagination
+  const allContributors = await client.contributors.getAll({
+    page: 1,
+    limit: 20,
+    search: 'GPU'
+  });
+  console.log('All contributors:', allContributors);
+  
+  // Get top contributors by reputation
+  const topContributors = await client.contributors.getTop({ limit: 10 });
+  console.log('Top contributors:', topContributors);
+  
+  // Get available contributors for training
+  const availableContributors = await client.contributors.getAvailable({
+    min_gpu_memory: '8GB',
+    min_bandwidth: '100Mbps'
+  });
+  console.log('Available contributors:', availableContributors);
+  
+  // Get contributor statistics
+  const contributorStats = await client.contributors.getStatistics();
+  console.log(`Total contributors: ${contributorStats.total_contributors}`);
+  console.log(`Online contributors: ${contributorStats.online_contributors}`);
+  
+  return allContributors;
+};
+
+// Monitor training sessions with WebSocket
+const monitorTraining = (sessionId: string) => {
+  const ws = client.websocket.connect();
+  
+  ws.on('training_progress', (data) => {
+    console.log(`Session ${data.session_id}: Progress ${data.progress}%`);
+  });
+  
+  ws.on('training_completed', (data) => {
+    console.log(`Training completed for session: ${data.session_id}`);
+  });
+  
+  // Subscribe to session updates
+  ws.emit('subscribe_training', { session_id: sessionId });
+};
+
+// Example usage
+const main = async () => {
+  try {
+    await registerUser();
+    await login();
+    const session = await createTrainingSession();
+    await createContributorProfile();
+    await getContributors();
+    monitorTraining(session.id);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
+main();
+```
+
+### React Integration
+
+```tsx
+import React, { useState, useEffect } from 'react';
+import { CoTrainClient, TrainingJob, TrainingUpdate } from '@cotrain/sdk';
+
+interface TrainingDashboardProps {
+  client: CoTrainClient;
+}
+
+const TrainingDashboard: React.FC<TrainingDashboardProps> = ({ client }) => {
+  const [jobs, setJobs] = useState<TrainingJob[]>([]);
+  const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [updates, setUpdates] = useState<TrainingUpdate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadJobs();
+  }, []);
+
+  useEffect(() => {
+    if (selectedJob) {
+      monitorJob(selectedJob);
+    }
+  }, [selectedJob]);
+
+  const loadJobs = async () => {
+    try {
+      const userJobs = await client.getUserJobs();
+      setJobs(userJobs);
+    } catch (error) {
+      console.error('Failed to load jobs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const monitorJob = async (jobId: string) => {
+    const jobUpdates: TrainingUpdate[] = [];
+    
+    try {
+      for await (const update of client.monitorJob(jobId)) {
+        jobUpdates.push(update);
+        setUpdates([...jobUpdates]);
+        
+        if (update.status === 'completed' || update.status === 'failed') {
+          break;
+        }
+      }
+    } catch (error) {
+      console.error('Failed to monitor job:', error);
+    }
+  };
+
+  const submitNewJob = async () => {
+    try {
+      const job = await client.submitTrainingJob({
+        config: {
+          modelType: 'transformer',
+          modelSize: '1B',
+          datasetPath: 's3://demo-bucket/data',
+          epochs: 5,
+          batchSize: 16,
+          learningRate: 1e-4
+        },
+        security: {
+          enableByzantineTolerance: true,
+          gradientClipping: true,
+          privacyLevel: 'medium'
+        },
+        maxCostCTN: 500
+      });
+      
+      setJobs([...jobs, job]);
+      setSelectedJob(job.id);
+    } catch (error) {
+      console.error('Failed to submit job:', error);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="loading">Loading training jobs...</div>;
+  }
+
+  return (
+    <div className="training-dashboard">
+      <div className="header">
+        <h1>CoTrain Training Dashboard</h1>
+        <button onClick={submitNewJob} className="submit-job-btn">
+          Submit New Job
+        </button>
+      </div>
+      
+      <div className="content">
+        <div className="jobs-list">
+          <h2>Training Jobs</h2>
+          {jobs.map(job => (
+            <div 
+              key={job.id} 
+              className={`job-item ${selectedJob === job.id ? 'selected' : ''}`}
+              onClick={() => setSelectedJob(job.id)}
+            >
+              <div className="job-info">
+                <span className="job-id">{job.id}</span>
+                <span className={`job-status ${job.status}`}>{job.status}</span>
+              </div>
+              <div className="job-details">
+                <span>Model: {job.config.modelType}</span>
+                <span>Cost: {job.estimatedCostCTN} CTN</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="job-monitor">
+          {selectedJob && (
+            <>
+              <h2>Job Monitor: {selectedJob}</h2>
+              <div className="updates-list">
+                {updates.map((update, index) => (
+                  <div key={index} className="update-item">
+                    <div className="update-header">
+                      <span>Epoch {update.epoch}</span>
+                      <span>{new Date(update.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <div className="update-metrics">
+                      <div className="metric">
+                        <label>Loss:</label>
+                        <span>{update.loss.toFixed(4)}</span>
+                      </div>
+                      <div className="metric">
+                        <label>Accuracy:</label>
+                        <span>{(update.accuracy * 100).toFixed(2)}%</span>
+                      </div>
+                      <div className="metric">
+                        <label>Progress:</label>
+                        <span>{(update.progress * 100).toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TrainingDashboard;
+```
+
+### Node.js Server Integration
+
+```typescript
+import express from 'express';
+import { CoTrainClient, WebhookHandler } from '@cotrain/sdk';
+import { createServer } from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+
+const app = express();
+const server = createServer(app);
+const io = new SocketIOServer(server);
+
+// Initialize CoTrain client
+const client = new CoTrainClient({
+  network: 'mainnet',
+  walletPath: process.env.COTRAIN_WALLET_PATH,
+  apiKey: process.env.COTRAIN_API_KEY
+});
+
+// Webhook handler for training updates
+const webhookHandler = new WebhookHandler({
+  secret: process.env.WEBHOOK_SECRET,
+  onTrainingUpdate: (update) => {
+    // Broadcast update to connected clients
+    io.emit('training-update', update);
+    
+    // Log important events
+    if (update.status === 'completed') {
+      console.log(`Training job ${update.jobId} completed successfully`);
+    } else if (update.status === 'failed') {
+      console.error(`Training job ${update.jobId} failed: ${update.error}`);
+    }
+  },
+  onPaymentUpdate: (payment) => {
+    io.emit('payment-update', payment);
+  }
+});
+
+app.use(express.json());
+
+// API Routes
+app.post('/api/training/submit', async (req, res) => {
+  try {
+    const { config, security, maxCostCTN } = req.body;
+    
+    const job = await client.submitTrainingJob({
+      config,
+      security,
+      maxCostCTN
+    });
+    
+    res.json({ success: true, job });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/training/jobs', async (req, res) => {
+  try {
+    const jobs = await client.getUserJobs();
+    res.json({ success: true, jobs });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/training/jobs/:id', async (req, res) => {
+  try {
+    const job = await client.getJob(req.params.id);
+    res.json({ success: true, job });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/training/jobs/:id/cancel', async (req, res) => {
+  try {
+    await client.cancelJob(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Webhook endpoint
+app.post('/webhooks/cotrain', webhookHandler.middleware);
+
+// WebSocket connection handling
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+  
+  socket.on('monitor-job', async (jobId) => {
+    try {
+      // Start monitoring job and send updates to this specific client
+      for await (const update of client.monitorJob(jobId)) {
+        socket.emit('job-update', update);
+        
+        if (update.status === 'completed' || update.status === 'failed') {
+          break;
+        }
+      }
+    } catch (error) {
+      socket.emit('error', { message: error.message });
+    }
+  });
+  
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`CoTrain API server running on port ${PORT}`);
+});
+```
+
+---
+
+## 🦀 Rust SDK
+
+### Installation
+
+```toml
+# Cargo.toml
+[dependencies]
+cotrain-sdk = "0.8.0"
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+```
+
+### Quick Start
+
+```rust
+use cotrain_sdk::{
+    CoTrainClient, TrainingConfig, SecurityConfig,
+    ModelType, NetworkType, Result
+};
+use tokio_stream::StreamExt;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    // Initialize client
+    let client = CoTrainClient::builder()
+        .base_url("http://localhost:3000/api")
+        .network(NetworkType::Mainnet)
+        .wallet_path("~/.cotrain/wallet.json")
+        .api_key(std::env::var("COTRAIN_API_KEY")?)
+        .build()
+        .await?;
+
+    // Check connection
+    let status = client.get_network_status().await?;
+    println!("Connected to {} with {} nodes", status.network_name, status.active_nodes);
+
+    // Configure training
+    let training_config = TrainingConfig {
+        model_type: ModelType::Transformer,
+        model_size: "7B".to_string(),
+        dataset_path: "s3://my-bucket/training-data".to_string(),
+        epochs: 10,
+        batch_size: 32,
+        learning_rate: 1e-4,
+        optimizer: "adamw".to_string(),
+        scheduler: Some("cosine".to_string()),
+    };
+
+    let security_config = SecurityConfig {
+        enable_byzantine_tolerance: true,
+        gradient_clipping: true,
+        privacy_level: "high".to_string(),
+        validator_count: 21,
+    };
+
+    // Submit training job
+    let job = client.submit_training_job(
+        training_config,
+        security_config,
+        1000, // max_cost_ctn
+        "normal".to_string(), // priority
+    ).await?;
+
+    println!("Training job submitted: {}", job.id);
+    println!("Estimated cost: {} CTN", job.estimated_cost_ctn);
+
+    // Monitor training progress
+    let mut monitor_stream = client.monitor_job(&job.id).await?;
+    
+    while let Some(update) = monitor_stream.next().await {
+        match update {
+            Ok(update) => {
+                println!("Epoch {}/{}", update.epoch, training_config.epochs);
+                println!("Loss: {:.4}", update.loss);
+                println!("Accuracy: {:.2}%", update.accuracy * 100.0);
+                println!("Progress: {:.1}%", update.progress * 100.0);
+                println!("---");
+                
+                match update.status.as_str() {
+                    "completed" => {
+                        println!("🎉 Training completed successfully!");
+                        break;
+                    }
+                    "failed" => {
+                        println!("❌ Training failed: {}", update.error.unwrap_or_default());
+                        break;
+                    }
+                    _ => {}
+                }
+            }
+            Err(e) => {
+                eprintln!("Error monitoring job: {}", e);
+                break;
+            }
+        }
+    }
+
+    // Download trained model
+    let model_path = client.download_model(&job.id, "./models/").await?;
+    println!("Model downloaded to: {}", model_path);
+
+    Ok(())
+}
+```
+
+### Advanced Usage
+
+```rust
+use cotrain_sdk::{
+    DistributedTrainer, GradientAggregator, ByzantineDetector,
+    Wallet, GovernanceClient, PerformanceMonitor
+};
+use std::sync::Arc;
+use tokio::sync::Mutex;
+
+// Custom trainer implementation
+struct CustomTrainer {
+    model: Arc<Mutex<dyn Model>>,
+    optimizer: Arc<Mutex<dyn Optimizer>>,
+    criterion: Arc<dyn Criterion>,
+    gradient_aggregator: GradientAggregator,
+    byzantine_detector: ByzantineDetector,
+}
+
+impl CustomTrainer {
+    pub fn new(
+        model: Arc<Mutex<dyn Model>>,
+        optimizer: Arc<Mutex<dyn Optimizer>>,
+        criterion: Arc<dyn Criterion>,
+    ) -> Self {
+        Self {
+            model,
+            optimizer,
+            criterion,
+            gradient_aggregator: GradientAggregator::new(),
+            byzantine_detector: ByzantineDetector::new(),
+        }
+    }
+}
+
+#[async_trait::async_trait]
+impl DistributedTrainer for CustomTrainer {
+    async fn training_step(
+        &mut self,
+        batch: &Batch,
+        batch_idx: usize,
+    ) -> Result<TrainingStepResult> {
+        let mut model = self.model.lock().await;
+        let mut optimizer = self.optimizer.lock().await;
+        
+        // Forward pass
+        let outputs = model.forward(&batch.inputs).await?;
+        let loss = self.criterion.compute_loss(&outputs, &batch.targets)?;
+        
+        // Backward pass
+        optimizer.zero_grad();
+        let gradients = model.backward(&loss).await?;
+        
+        // Secure gradient aggregation
+        let aggregated_gradients = self.gradient_aggregator.aggregate(
+            &gradients,
+            self.worker_id(),
+            self.current_round(),
+        ).await?;
+        
+        // Byzantine detection
+        let is_malicious = self.byzantine_detector.detect_anomaly(
+            &gradients,
+            &aggregated_gradients,
+        ).await?;
+        
+        if !is_malicious {
+            model.apply_gradients(&aggregated_gradients).await?;
+            optimizer.step().await?;
+        }
+        
+        Ok(TrainingStepResult {
+            loss: loss.item(),
+            is_malicious,
+            gradient_norm: gradients.norm(),
+        })
+    }
+    
+    async fn validation_step(
+        &mut self,
+        batch: &Batch,
+        batch_idx: usize,
+    ) -> Result<ValidationStepResult> {
+        let model = self.model.lock().await;
+        
+        let outputs = model.forward(&batch.inputs).await?;
+        let loss = self.criterion.compute_loss(&outputs, &batch.targets)?;
+        
+        let predictions = outputs.argmax(-1)?;
+        let accuracy = predictions.eq(&batch.targets)?.float().mean()?;
+        
+        Ok(ValidationStepResult {
+            val_loss: loss.item(),
+            val_accuracy: accuracy.item(),
+        })
+    }
+}
+
+// Wallet and governance operations
+async fn wallet_operations() -> Result<()> {
+    let wallet = Wallet::from_file("~/.cotrain/wallet.json").await?;
+    
+    // Check balance
+    let balance = wallet.get_balance().await?;
+    println!("CTN Balance: {:.2}", balance.ctn);
+    println!("Staked: {:.2}", balance.staked);
+    println!("Available: {:.2}", balance.available);
+    
+    // Stake tokens
+    let stake_tx = wallet.stake_tokens(1000.0).await?;
+    println!("Staked 1000 CTN. Transaction: {}", stake_tx.hash);
+    
+    // Governance operations
+    let governance = GovernanceClient::new(wallet).await?;
+    
+    // View proposals
+    let proposals = governance.get_active_proposals().await?;
+    for proposal in proposals {
+        println!("Proposal {}: {}", proposal.id, proposal.title);
+        println!("Votes: {} for, {} against", proposal.votes_for, proposal.votes_against);
+    }
+    
+    // Vote on proposal
+    let vote_tx = governance.vote("prop-001", "for", 500.0).await?;
+    println!("Voted on proposal. Transaction: {}", vote_tx.hash);
+    
+    Ok(())
+}
+
+// Performance monitoring
+async fn monitor_performance(job_id: &str) -> Result<()> {
+    let monitor = PerformanceMonitor::new();
+    monitor.start_monitoring(job_id).await?;
+    
+    let mut metrics_stream = monitor.collect_metrics().await?;
+    
+    while let Some(metrics) = metrics_stream.next().await {
+        println!("GPU Utilization: {:.1}%", metrics.gpu_utilization);
+        println!("Memory Usage: {:.1}%", metrics.memory_usage);
+        println!("Network I/O: {:.1} Mbps", metrics.network_io_mbps);
+        println!("Training Throughput: {:.1} samples/s", metrics.samples_per_second);
+        println!("---");
+        
+        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+    }
+    
+    Ok(())
+}
+```
+
+---
+
+## 🐹 Go SDK
+
+### Installation
+
+```bash
+go get github.com/cotrain-ai/cotrain-go-sdk
+```
+
+### Quick Start
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+    "os"
+    
+    "github.com/cotrain-ai/cotrain-go-sdk/pkg/cotrain"
+)
+
+func main() {
+    // Initialize client
+    client, err := cotrain.NewClient(&cotrain.Config{
+        BaseURL:    "http://localhost:3000/api",
+        Network:    cotrain.NetworkMainnet,
+        WalletPath: "~/.cotrain/wallet.json",
+        APIKey:     os.Getenv("COTRAIN_API_KEY"),
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    ctx := context.Background()
+    
+    // Check connection
+    status, err := client.GetNetworkStatus(ctx)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("Connected to %s with %d nodes\n", status.NetworkName, status.ActiveNodes)
+    
+    // Configure training
+    trainingConfig := &cotrain.TrainingConfig{
+        ModelType:    cotrain.ModelTypeTransformer,
+        ModelSize:    "7B",
+        DatasetPath:  "s3://my-bucket/training-data",
+        Epochs:       10,
+        BatchSize:    32,
+        LearningRate: 1e-4,
+        Optimizer:    "adamw",
+        Scheduler:    "cosine",
+    }
+    
+    securityConfig := &cotrain.SecurityConfig{
+        EnableByzantineTolerance: true,
+        GradientClipping:         true,
+        PrivacyLevel:            "high",
+        ValidatorCount:          21,
+    }
+    
+    // Submit training job
+    job, err := client.SubmitTrainingJob(ctx, &cotrain.SubmitJobRequest{
+        Config:     trainingConfig,
+        Security:   securityConfig,
+        MaxCostCTN: 1000,
+        Priority:   "normal",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("Training job submitted: %s\n", job.ID)
+    fmt.Printf("Estimated cost: %.2f CTN\n", job.EstimatedCostCTN)
+    
+    // Monitor training progress
+    updatesChan, err := client.MonitorJob(ctx, job.ID)
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    for update := range updatesChan {
+        if update.Error != nil {
+            log.Printf("Error monitoring job: %v", update.Error)
+            continue
+        }
+        
+        fmt.Printf("Epoch %d/%d\n", update.Epoch, trainingConfig.Epochs)
+        fmt.Printf("Loss: %.4f\n", update.Loss)
+        fmt.Printf("Accuracy: %.2f%%\n", update.Accuracy*100)
+        fmt.Printf("Progress: %.1f%%\n", update.Progress*100)
+        fmt.Println("---")
+        
+        switch update.Status {
+        case "completed":
+            fmt.Println("🎉 Training completed successfully!")
+            goto done
+        case "failed":
+            fmt.Printf("❌ Training failed: %s\n", update.ErrorMessage)
+            goto done
+        }
+    }
+    
+done:
+    // Download trained model
+    modelPath, err := client.DownloadModel(ctx, job.ID, "./models/")
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("Model downloaded to: %s\n", modelPath)
+}
+```
+
+---
+
+## 🔧 Configuration
+
+### Environment Variables
+
+```bash
+# Network configuration
+COTRAIN_NETWORK=mainnet  # or testnet
+COTRAIN_RPC_URL=https://fullnode.mainnet.aptoslabs.com/v1
+COTRAIN_API_KEY=your-api-key
+
+# Wallet configuration
+COTRAIN_WALLET_PATH=~/.cotrain/wallet.json
+COTRAIN_PRIVATE_KEY=your-private-key  # Alternative to wallet file
+
+# Performance settings
+COTRAIN_MAX_CONCURRENT_JOBS=4
+COTRAIN_DEFAULT_TIMEOUT=3600
+COTRAIN_RETRY_ATTEMPTS=3
+
+# Security settings
+COTRAIN_ENABLE_TLS=true
+COTRAIN_VERIFY_CERTIFICATES=true
+COTRAIN_ENABLE_LOGGING=true
+
+# Monitoring settings
+COTRAIN_METRICS_ENABLED=true
+COTRAIN_METRICS_INTERVAL=10
+COTRAIN_LOG_LEVEL=info
+```
+
+### Configuration Files
+
+```yaml
+# ~/.cotrain/config.yaml
+network:
+  name: mainnet
+  rpc_url: https://fullnode.mainnet.aptoslabs.com/v1
+  api_key: ${COTRAIN_API_KEY}
+
+wallet:
+  path: ~/.cotrain/wallet.json
+  auto_create: true
+
+security:
+  enable_tls: true
+  verify_certificates: true
+  byzantine_tolerance: true
+  gradient_clipping: true
+  privacy_level: high
+
+performance:
+  max_concurrent_jobs: 4
+  default_timeout: 3600
+  retry_attempts: 3
+  connection_pool_size: 10
+
+monitoring:
+  enable_metrics: true
+  metrics_interval: 10
+  log_level: info
+  export_format: prometheus
+
+defaults:
+  model_type: transformer
+  batch_size: 32
+  learning_rate: 1e-4
+  optimizer: adamw
+  scheduler: cosine
+```
+
+---
+
+## 🚀 Examples
+
+### Fine-tuning a Language Model
+
+```python
+from cotrain import CoTrainClient, TrainingConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+
+# Load pre-trained model
+model_name = "microsoft/DialoGPT-medium"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
+
+# Prepare dataset
+def prepare_dataset(conversations):
+    """Prepare conversational dataset for fine-tuning"""
+    inputs = []
+    targets = []
+    
+    for conversation in conversations:
+        # Tokenize conversation
+        tokens = tokenizer.encode(conversation, return_tensors="pt")
+        
+        # Create input-target pairs
+        for i in range(1, len(tokens[0])):
+            input_seq = tokens[0][:i]
+            target = tokens[0][i]
+            
+            inputs.append(input_seq)
+            targets.append(target)
+    
+    return inputs, targets
+
+# Initialize CoTrain client
+client = CoTrainClient(
+    network="mainnet",
+    wallet_path="~/.cotrain/wallet.json",
+    api_key="your-api-key"
+)
+
+# Configure fine-tuning
+config = TrainingConfig(
+    model_class=AutoModelForCausalLM,
+    model_args={
+        "pretrained_model_name_or_path": model_name
+    },
+    tokenizer_class=AutoTokenizer,
+    tokenizer_args={
+        "pretrained_model_name_or_path": model_name
+    },
+    dataset_path="s3://my-bucket/conversations.json",
+    dataset_preprocessing=prepare_dataset,
+    epochs=3,
+    batch_size=16,
+    learning_rate=5e-5,
+    optimizer="adamw",
+    scheduler="linear",
+    warmup_steps=500,
+    max_grad_norm=1.0,
+    save_steps=1000,
+    eval_steps=500
+)
+
+# Submit fine-tuning job
+job = client.submit_training_job(
+    config=config,
+    max_cost_ctn=2000,
+    priority="high"
+)
+
+print(f"Fine-tuning job submitted: {job.id}")
+
+# Monitor progress
+for update in client.monitor_job(job.id):
+    print(f"Step {update.step}: Loss = {update.loss:.4f}")
+    
+    if update.status == "completed":
+        print("Fine-tuning completed!")
+        break
+
+# Download fine-tuned model
+model_path = client.download_model(job.id, "./fine_tuned_model/")
+print(f"Fine-tuned model saved to: {model_path}")
+
+# Test the fine-tuned model
+fine_tuned_model = AutoModelForCausalLM.from_pretrained(model_path)
+fine_tuned_tokenizer = AutoTokenizer.from_pretrained(model_path)
+
+# Generate response
+input_text = "Hello, how are you?"
+input_ids = fine_tuned_tokenizer.encode(input_text, return_tensors="pt")
+
+with torch.no_grad():
+    output = fine_tuned_model.generate(
+        input_ids,
+        max_length=50,
+        num_return_sequences=1,
+        temperature=0.7,
+        pad_token_id=fine_tuned_tokenizer.eos_token_id
+    )
+
+response = fine_tuned_tokenizer.decode(output[0], skip_special_tokens=True)
+print(f"Response: {response}")
+```
+
+### Distributed Image Classification
+
+```python
+import torch
+import torch.nn as nn
+import torchvision.transforms as transforms
+from cotrain import CoTrainClient, TrainingConfig, SecurityConfig
+
+# Define model architecture
+class ImageClassifier(nn.Module):
+    def __init__(self, num_classes=1000):
+        super().__init__()
+        self.backbone = torch.hub.load('pytorch/vision:v0.10.0', 'resnet50', pretrained=True)
+        self.backbone.fc = nn.Linear(self.backbone.fc.in_features, num_classes)
+        
+    def forward(self, x):
+        return self.backbone(x)
+
+# Data preprocessing
+transforms_config = {
+    'train': transforms.Compose([
+        transforms.RandomResizedCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ]),
+    'val': transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+}
+
+# Initialize client
+client = CoTrainClient(
+    network="mainnet",
+    wallet_path="~/.cotrain/wallet.json",
+    api_key="your-api-key"
+)
+
+# Configure training
+training_config = TrainingConfig(
+    model_class=ImageClassifier,
+    model_args={"num_classes": 10},  # CIFAR-10
+    dataset_path="s3://my-bucket/cifar10/",
+    dataset_format="imagefolder",
+    transforms=transforms_config,
+    epochs=50,
+    batch_size=128,
+    learning_rate=0.001,
+    optimizer="sgd",
+    optimizer_args={"momentum": 0.9, "weight_decay": 1e-4},
+    scheduler="step",
+    scheduler_args={"step_size": 20, "gamma": 0.1},
+    criterion="crossentropy",
+    metrics=["accuracy", "top5_accuracy"],
+    validation_split=0.2,
+    early_stopping_patience=10
+)
+
+# Enhanced security for production training
+security_config = SecurityConfig(
+    enable_byzantine_tolerance=True,
+    gradient_clipping=True,
+    gradient_clip_value=1.0,
+    privacy_level="high",
+    validator_count=25,
+    reputation_threshold=0.8,
+    enable_differential_privacy=True,
+    dp_noise_multiplier=1.1,
+    dp_max_grad_norm=1.0
+)
+
+# Submit training job
+job = client.submit_training_job(
+    config=training_config,
+    security=security_config,
+    max_cost_ctn=5000,
+    priority="high",
+    tags=["image-classification", "resnet50", "cifar10"]
+)
+
+print(f"Training job submitted: {job.id}")
+print(f"Estimated completion time: {job.estimated_completion_time}")
+
+# Real-time monitoring with detailed metrics
+for update in client.monitor_job(job.id, detailed=True):
+    print(f"\nEpoch {update.epoch}/{training_config.epochs}")
+    print(f"Training Loss: {update.train_loss:.4f}")
+    print(f"Validation Loss: {update.val_loss:.4f}")
+    print(f"Training Accuracy: {update.train_accuracy:.2%}")
+    print(f"Validation Accuracy: {update.val_accuracy:.2%}")
+    print(f"Learning Rate: {update.learning_rate:.6f}")
+    print(f"GPU Utilization: {update.gpu_utilization:.1f}%")
+    print(f"Active Nodes: {update.active_nodes}")
+    print(f"Security Score: {update.security_score:.2f}")
+    
+    if update.status == "completed":
+        print("\n🎉 Training completed successfully!")
+        print(f"Final Validation Accuracy: {update.val_accuracy:.2%}")
+        break
+    elif update.status == "failed":
+        print(f"\n❌ Training failed: {update.error}")
+        break
+
+# Download and evaluate model
+model_path = client.download_model(job.id, "./trained_models/")
+print(f"Model downloaded to: {model_path}")
+
+# Load trained model for inference
+trained_model = torch.load(model_path)
+trained_model.eval()
+
+# Deploy model for inference
+deployment = client.deploy_model(
+    model_path=model_path,
+    name="cifar10-classifier",
+    description="ResNet-50 trained on CIFAR-10",
+    input_schema={
+        "type": "image",
+        "format": "jpeg",
+        "size": [224, 224]
+    },
+    output_schema={
+        "type": "classification",
+        "classes": 10
+    },
+    max_requests_per_second=1000,
+    auto_scaling=True
+)
+
+print(f"Model deployed at: {deployment.endpoint_url}")
+print(f"API Key: {deployment.api_key}")
+```
+
+---
+
+## 📚 API Reference
+
+For complete API documentation, visit:
+
+- **[Python SDK API Reference](https://docs.cotrain.ai/sdk/python)**
+- **[JavaScript/TypeScript SDK API Reference](https://docs.cotrain.ai/sdk/javascript)**
+- **[Rust SDK API Reference](https://docs.cotrain.ai/sdk/rust)**
+- **[Go SDK API Reference](https://docs.cotrain.ai/sdk/go)**
+
+---
+
+## 🆘 Support & Community
+
+### 📖 Documentation
+- **[Getting Started Guide](/docs/quickstart)**
+- **[API Reference](/docs/api)**
+- **[Examples Repository](https://github.com/cotrain-ai/examples)**
+- **[Best Practices Guide](https://docs.cotrain.ai/best-practices)**
+
+### 🤝 Community
+- **[Discord](https://discord.gg/cotrain)** - Real-time support and discussions
+- **[GitHub](https://github.com/cotrain-ai)** - Source code and issue tracking
+- **[Forum](https://forum.cotrain.ai)** - Technical discussions and Q&A
+- **[Stack Overflow](https://stackoverflow.com/questions/tagged/cotrain)** - Programming questions
+
+### 🐛 Bug Reports & Feature Requests
+- **[Python SDK Issues](https://github.com/cotrain-ai/cotrain-python-sdk/issues)**
+- **[JavaScript SDK Issues](https://github.com/cotrain-ai/cotrain-js-sdk/issues)**
+- **[Rust SDK Issues](https://github.com/cotrain-ai/cotrain-rust-sdk/issues)**
+- **[Go SDK Issues](https://github.com/cotrain-ai/cotrain-go-sdk/issues)**
+
+### 📧 Direct Support
+- **Technical Support**: [support@cotrain.ai](mailto:support@cotrain.ai)
+- **Partnership Inquiries**: [partnerships@cotrain.ai](mailto:partnerships@cotrain.ai)
+- **Security Issues**: [security@cotrain.ai](mailto:security@cotrain.ai)
+
+---
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+  <div className="p-6 border rounded-lg">
+    <h3 className="text-lg font-semibold mb-2">🐍 Python SDK</h3>
+    <p className="text-sm text-muted-foreground mb-4">Most popular SDK with comprehensive features</p>
+    <a href="https://pypi.org/project/cotrain-sdk/" className="text-blue-600 hover:text-blue-800 font-medium">Install from PyPI →</a>
+  </div>
+  <div className="p-6 border rounded-lg">
+    <h3 className="text-lg font-semibold mb-2">🌐 JavaScript SDK</h3>
+    <p className="text-sm text-muted-foreground mb-4">Perfect for web applications and Node.js</p>
+    <a href="https://www.npmjs.com/package/@cotrain/sdk" className="text-blue-600 hover:text-blue-800 font-medium">Install from NPM →</a>
+  </div>
+  <div className="p-6 border rounded-lg">
+    <h3 className="text-lg font-semibold mb-2">📚 Examples</h3>
+    <p className="text-sm text-muted-foreground mb-4">Complete examples and tutorials</p>
+    <a href="https://github.com/cotrain-ai/examples" className="text-blue-600 hover:text-blue-800 font-medium">View Examples →</a>
+  </div>
+</div>
+
+[View API Reference →](/docs/api) • [Check Development Guide →](/docs/development) • [Explore Tokenomics →](/docs/tokenomics)

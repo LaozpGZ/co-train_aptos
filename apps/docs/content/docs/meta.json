@@ -1,0 +1,12 @@
+{
+  "title": "CoTrain Documentation",
+  "pages": [
+    "index",
+    "quickstart",
+    "roadmap",
+    "development",
+    "tokenomics",
+    "sdk",
+    "api"
+  ]
+}

@@ -1,0 +1,258 @@
+---
+title: "Quickstart Guide"
+description: "Start contributing to CoTrain from any system or with Python."
+full: true
+---
+
+# 🚀 CoTrain Quickstart
+
+Welcome to **CoTrain** — a decentralized AI training network that empowers everyone to contribute compute and co-create state-of-the-art AI.
+
+Whether you're running Linux, macOS, Windows, or coding in Python, follow the steps below to get started.
+
+---
+
+## 🌍 Requirements
+
+Before you begin, make sure you have:
+
+- ✅ At least one **NVIDIA GPU** (recommended: RTX 3080 or better)
+- ✅ **Docker** (for system nodes) or Python ≥ 3.8 (for SDK users)
+- ✅ A [CoTrain account](https://join.cotrain.ai)
+- ✅ Stable internet connection (minimum 10 Mbps upload)
+
+---
+
+## 💻 Docker Setup (Recommended)
+
+### 🐧 Linux
+
+```bash
+# Pull and run the CoTrain node
+docker run -d \
+  --gpus all \
+  --restart unless-stopped \
+  --name cotrain-node \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -e COTRAIN_API_KEY="your_api_key_here" \
+  cotrain/node-agent:latest
+```
+
+### 🍎 macOS
+
+```bash
+# Note: macOS has limited GPU passthrough
+docker run -d \
+  --name cotrain-node \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -e COTRAIN_API_KEY="your_api_key_here" \
+  cotrain/node-agent:latest
+```
+
+> ⚠️ **Note**: macOS has limited GPU passthrough. Consider using a Linux server or cloud instance for better performance.
+
+### 🪟 Windows (WSL2)
+
+```powershell
+# Make sure WSL2 and Docker Desktop are installed
+# Run inside WSL2 terminal:
+docker run -d --gpus all --restart unless-stopped --name cotrain-node `
+  -v /var/run/docker.sock:/var/run/docker.sock `
+  -e COTRAIN_API_KEY="your_api_key_here" `
+  cotrain/node-agent:latest
+```
+
+### 🔐 Authentication
+
+If you didn't set the API key during container creation, authenticate your node:
+
+```bash
+# Get your API token from dashboard.cotrain.ai
+docker exec -it cotrain-node cotrain login
+
+# Or set it directly
+docker exec -it cotrain-node cotrain auth --token "your_api_key_here"
+```
+
+### 📊 Monitor Your Node
+
+```bash
+# Check node status
+docker exec -it cotrain-node cotrain status
+
+# View logs
+docker logs -f cotrain-node
+
+# Check earnings
+docker exec -it cotrain-node cotrain earnings
+```
+
+---
+
+## 🐍 Python SDK Setup
+
+For developers who want to run training jobs or integrate CoTrain into their applications:
+
+### 1. Install the SDK
+
+```bash
+pip install cotrain-sdk
+```
+
+### 2. Authentication
+
+```python
+from cotrain import CoTrain
+
+# Initialize client with your API key
+client = CoTrain(api_key="your_api_key_here")
+
+# Test connection
+response = client.ping()
+print(f"Connected to CoTrain: {response.status}")
+```
+
+### 3. Submit a Training Job
+
+```python
+from cotrain import submit_job
+
+# Submit a simple training job
+job = submit_job(
+    job_name="my-first-training",
+    image="cotrain/pytorch:latest",
+    command="python train.py --epochs 10",
+    resources={
+        "gpus": 1,
+        "memory": "8GiB",
+        "cpu_cores": 4
+    },
+    dataset_url="https://example.com/dataset.tar.gz"
+)
+
+print(f"Job submitted: {job.id}")
+print(f"Status: {job.status}")
+```
+
+### 4. Monitor Job Progress
+
+```python
+# Check job status
+status = client.get_job_status(job.id)
+print(f"Progress: {status.progress}%")
+print(f"Current epoch: {status.current_epoch}")
+
+# Get job logs
+logs = client.get_job_logs(job.id)
+for log_line in logs:
+    print(log_line)
+```
+
+---
+
+## 🔧 Advanced Configuration
+
+### Custom Docker Configuration
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  cotrain-node:
+    image: cotrain/node-agent:latest
+    restart: unless-stopped
+    environment:
+      - COTRAIN_API_KEY=${COTRAIN_API_KEY}
+      - COTRAIN_NODE_NAME=my-powerful-node
+      - COTRAIN_MAX_JOBS=4
+      - COTRAIN_GPU_MEMORY_LIMIT=0.8
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/app/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+```
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|----------|
+| `COTRAIN_API_KEY` | Your API authentication key | Required |
+| `COTRAIN_NODE_NAME` | Custom name for your node | Auto-generated |
+| `COTRAIN_MAX_JOBS` | Maximum concurrent jobs | 2 |
+| `COTRAIN_GPU_MEMORY_LIMIT` | GPU memory usage limit (0.0-1.0) | 0.9 |
+| `COTRAIN_LOG_LEVEL` | Logging verbosity | INFO |
+
+---
+
+## 🎯 Next Steps
+
+Now that you have CoTrain running, here's what you can do next:
+
+### For Contributors
+- 📊 **[Monitor your earnings](https://dashboard.cotrain.ai)** - Track your CTN token rewards
+- 🔧 **[Optimize your setup](/docs/development/optimization)** - Maximize your contribution efficiency
+- 🏆 **[Join the community](https://discord.gg/cotrain)** - Connect with other contributors
+
+### For Developers
+- 📚 **[Explore the SDK](/docs/sdk)** - Learn advanced SDK features
+- 🔌 **[API Reference](/docs/api)** - Integrate CoTrain into your applications
+- 🧪 **[Example Projects](https://github.com/cotrain/examples)** - See CoTrain in action
+
+### For Researchers
+- 🧠 **[Model Training Guide](/docs/development/training)** - Learn best practices for distributed training
+- 📖 **[Research Papers](https://research.cotrain.ai)** - Read about our Byzantine-fault tolerant protocols
+- 🤝 **[Collaboration Program](/docs/development/collaboration)** - Partner with CoTrain for research
+
+---
+
+## 🆘 Troubleshooting
+
+### Common Issues
+
+<details>
+<summary><strong>Docker container won't start</strong></summary>
+
+1. Check if Docker is running: `docker --version`
+2. Verify GPU drivers: `nvidia-smi`
+3. Check container logs: `docker logs cotrain-node`
+4. Ensure ports aren't blocked by firewall
+
+</details>
+
+<details>
+<summary><strong>Authentication failed</strong></summary>
+
+1. Verify your API key at [dashboard.cotrain.ai](https://dashboard.cotrain.ai)
+2. Check if the key has proper permissions
+3. Try re-authenticating: `docker exec -it cotrain-node cotrain login`
+
+</details>
+
+<details>
+<summary><strong>Low earnings or no jobs</strong></summary>
+
+1. Check your node's reputation score
+2. Ensure stable internet connection
+3. Verify GPU is properly detected
+4. Consider staking CTN tokens for priority
+
+</details>
+
+### Getting Help
+
+- 💬 **[Discord Community](https://discord.gg/cotrain)** - Get help from the community
+- 📧 **[Support Email](mailto:support@cotrain.ai)** - Contact our support team
+- 📖 **[Documentation](/docs)** - Browse our comprehensive docs
+- 🐛 **[GitHub Issues](https://github.com/cotrain/node-agent/issues)** - Report bugs or request features
+
+---
+
+> 📘 **Pro Tip**: For the best experience and highest earnings, keep your node running 24/7 with a stable internet connection. The CoTrain network rewards consistent, reliable contributors!
+
+[Explore SDK Features →](/docs/sdk) • [View API Reference →](/docs/api) • [Learn About Tokenomics →](/docs/tokenomics)

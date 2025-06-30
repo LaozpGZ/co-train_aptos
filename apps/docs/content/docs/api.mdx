@@ -1,0 +1,2317 @@
+---
+title: "API Reference"
+description: "Complete API documentation for the CoTrain decentralized AI training platform."
+full: true
+---
+
+# 🧠 CoTrain API Reference
+
+This API allows you to query:
+
+- 👤 Training contribution of a specific user (by wallet address)
+- 🧪 Real-time progress of a model training job (by model ID)
+- 🔐 User authentication and registration
+- 🚀 Training session management
+- ⛓️ Blockchain interactions
+- 👥 Contributor profiles
+
+All endpoints return JSON and are accessible via `https://api.cotrain.network/v1`.
+
+---
+
+## 🌟 API Overview
+
+### Base URLs
+
+| Environment | Base URL | Description |
+|-------------|----------|-------------|
+| **Production** | `https://api.cotrain.network/v1` | Live production environment |
+| **Development** | `http://localhost:3001/api` | Local development server |
+| **Testnet** | `https://testnet-api.cotrain.network/v1` | Testing environment |
+
+### Authentication
+
+You must include your API key in the `Authorization` header for authenticated endpoints:
+
+```http
+Authorization: Bearer <your-api-key>
+```
+
+#### JWT Token Authentication
+```bash
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+     -H "Content-Type: application/json" \
+     http://localhost:3001/api/training
+```
+
+### Rate Limiting
+
+| Tier | Requests/Minute | Burst Limit |
+|------|-----------------|-------------|
+| **Free** | 100 | 200 |
+| **Pro** | 1,000 | 2,000 |
+| **Enterprise** | 10,000 | 20,000 |
+
+### Response Format
+
+All API responses follow a consistent JSON structure:
+
+```json
+{
+  "success": true,
+  "data": {
+    // Response data
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+Error responses:
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "details": [
+      {
+        "field": "email",
+        "message": "Invalid email format"
+      }
+    ]
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+---
+
+## 🔐 Authentication API
+
+### User Registration
+
+```http
+POST /auth/register
+```
+
+Register a new user account.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123",
+  "username": "myusername",
+  "wallet_address": "0x1::account::address"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "user_123",
+      "email": "user@example.com",
+      "username": "myusername",
+      "wallet_address": "0x1::account::address",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### User Login
+
+```http
+POST /auth/login
+```
+
+Authenticate a user and receive an access token.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "user_123",
+      "email": "user@example.com",
+      "username": "myusername"
+    },
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Get Current User Profile
+
+```http
+GET /auth/profile
+```
+
+Get the current authenticated user's profile.
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "user_123",
+      "email": "user@example.com",
+      "username": "myusername",
+      "wallet_address": "0x1::account::address",
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-15T10:30:00Z"
+    }
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+---
+
+## 🚀 Training API
+
+### Create Training Session
+
+```http
+POST /training
+```
+
+Create a new training session on the CoTrain network.
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "My Training Session",
+  "description": "Training a language model",
+  "model_type": "transformer",
+  "dataset_url": "https://example.com/dataset.zip",
+  "config": {
+    "epochs": 10,
+    "batch_size": 32,
+    "learning_rate": 0.001
+  },
+  "requirements": {
+    "gpu_count": 4,
+    "memory_gb": 32,
+    "storage_gb": 100
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "session": {
+      "id": "session_123",
+      "name": "My Training Session",
+      "status": "pending",
+      "created_at": "2024-01-15T10:30:00Z",
+      "estimated_duration": "2 hours",
+      "cost_estimate": {
+        "ctn_tokens": 150,
+        "usd_equivalent": 75.00
+      }
+    }
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Get Training Sessions
+
+```http
+GET /training
+```
+
+Retrieve all training sessions for the authenticated user.
+
+```http
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "sessions": [
+      {
+        "id": "session_123",
+        "name": "My Training Session",
+        "status": "running",
+        "progress": 45.2,
+        "created_at": "2024-01-15T10:30:00Z",
+        "estimated_completion": "2024-01-15T12:30:00Z"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "limit": 10
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Get Training Session Details
+
+```http
+GET /training/{session_id}
+```
+
+Get detailed information about a specific training session.
+
+**Parameters:**
+- `session_id` (string): The ID of the training session
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "session": {
+      "id": "session_123",
+      "name": "My Training Session",
+      "description": "Training a language model",
+      "status": "running",
+      "progress": 45.2,
+      "model_type": "transformer",
+      "config": {
+        "epochs": 10,
+        "batch_size": 32,
+        "learning_rate": 0.001
+      },
+      "metrics": {
+        "loss": 0.234,
+        "accuracy": 0.892,
+        "gpu_utilization": 85.3
+      },
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-15T11:15:00Z"
+    }
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+---
+
+## ⛓️ Blockchain API
+
+### Create Training Session on Blockchain
+
+```http
+POST /blockchain/training-session
+```
+
+Create a training session record on the Aptos blockchain.
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "session_id": "session_123",
+  "model_hash": "0xabc123...",
+  "participant_addresses": [
+    "0x1::account::address1",
+    "0x1::account::address2"
+  ],
+  "reward_pool": 1000,
+  "duration_hours": 24
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "transaction_hash": "0xdef456...",
+    "session_address": "0x1::training::session_123",
+    "status": "pending",
+    "gas_used": 1250
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Register Participant
+
+```http
+POST /blockchain/register-participant
+```
+
+Register a participant for a training session on the blockchain.
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "session_id": "session_123",
+  "participant_address": "0x1::account::address",
+  "stake_amount": 100,
+  "gpu_specs": {
+    "model": "RTX 4090",
+    "memory_gb": 24,
+    "compute_capability": 8.9
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "transaction_hash": "0xghi789...",
+    "participant_id": "participant_456",
+    "status": "registered",
+    "stake_locked": true
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Get Blockchain Status
+
+```http
+GET /blockchain/status
+```
+
+Get the current status of blockchain operations.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "network": "aptos-testnet",
+    "block_height": 12345678,
+    "active_sessions": 42,
+    "total_participants": 1337,
+    "total_rewards_distributed": 50000,
+    "ctn_token_address": "0x1::ctn::token"
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+---
+
+## 👥 Contributors API
+
+### Create Contributor Profile
+
+```http
+POST /contributors
+```
+
+Create a new contributor profile.
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "John Doe",
+  "bio": "AI researcher and GPU contributor",
+  "location": "San Francisco, CA",
+  "skills": ["Machine Learning", "PyTorch", "CUDA"],
+  "gpu_specs": {
+    "models": ["RTX 4090", "RTX 3080"],
+    "total_memory_gb": 48,
+    "availability_hours": 16
+  },
+  "social_links": {
+    "github": "https://github.com/johndoe",
+    "twitter": "https://twitter.com/johndoe"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "contributor": {
+      "id": "contributor_789",
+      "name": "John Doe",
+      "reputation_score": 0,
+      "total_contributions": 0,
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Get Contributor Profile
+
+```http
+GET /contributors/{contributor_id}
+```
+
+Get detailed information about a contributor.
+
+**Parameters:**
+- `contributor_id` (string): The ID of the contributor
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "contributor": {
+      "id": "contributor_789",
+      "name": "John Doe",
+      "bio": "AI researcher and GPU contributor",
+      "reputation_score": 95.7,
+      "total_contributions": 42,
+      "total_gpu_hours": 1250.5,
+      "ctn_earned": 5000,
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+---
+
+## 📊 User Contribution API
+
+### Get User Contribution
+
+```http
+GET /users/{wallet_address}/contribution
+```
+
+Fetch the total contribution (compute time, job count, rewards) of a specific GPU provider or contributor by their wallet address.
+
+**Parameters:**
+- `wallet_address` (string): Aptos wallet address of user
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "wallet_address": "0xabc123...",
+    "total_gpu_hours": 128.5,
+    "jobs_completed": 42,
+    "ctn_earned": 962.75,
+    "ranking_percentile": 0.12,
+    "reputation_score": 95.7,
+    "last_contribution": "2024-01-15T09:30:00Z"
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+---
+
+## 🧪 Model Training Progress API
+
+### Get Model Training Progress
+
+```http
+GET /models/{model_id}/progress
+```
+
+Returns the training progress of a model, including training phase, percent completion, total compute contributed, and contributors list.
+
+**Parameters:**
+- `model_id` (string): ID of the model
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "model_id": "llama2-42b",
+    "status": "training",
+    "percent_complete": 73.4,
+    "estimated_completion_time": "2025-07-28T12:00:00Z",
+    "total_gpu_hours": 18422.3,
+    "current_epoch": 7,
+    "total_epochs": 10,
+    "metrics": {
+      "loss": 0.234,
+      "accuracy": 0.892,
+      "perplexity": 12.5
+    },
+    "contributors": [
+      {
+        "wallet": "0xabc123...",
+        "gpu_hours": 152.5,
+        "contribution_percentage": 8.3
+      },
+      {
+        "wallet": "0xdef456...",
+        "gpu_hours": 87.3,
+        "contribution_percentage": 4.7
+      }
+    ]
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+---
+
+## 📈 Example Integration
+
+### Python Example
+
+```python
+import requests
+import json
+
+# Configuration
+API_BASE_URL = "https://api.cotrain.network/v1"
+API_KEY = "your-api-key-here"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+# Get user contribution
+def get_user_contribution(wallet_address):
+    url = f"{API_BASE_URL}/users/{wallet_address}/contribution"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+# Get model training progress
+def get_model_progress(model_id):
+    url = f"{API_BASE_URL}/models/{model_id}/progress"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+# Create training session
+def create_training_session(session_data):
+    url = f"{API_BASE_URL}/training"
+    response = requests.post(url, headers=headers, json=session_data)
+    return response.json()
+
+# Example usage
+if __name__ == "__main__":
+    # Check user contribution
+    contribution = get_user_contribution("0xabc123...")
+    print(f"User has contributed {contribution['data']['total_gpu_hours']} GPU hours")
+    
+    # Check model progress
+    progress = get_model_progress("llama2-42b")
+    print(f"Model training is {progress['data']['percent_complete']}% complete")
+    
+    # Create new training session
+    session_data = {
+        "name": "My AI Model",
+        "description": "Training a custom transformer model",
+        "model_type": "transformer",
+        "dataset_url": "https://example.com/dataset.zip",
+        "config": {
+            "epochs": 5,
+            "batch_size": 16,
+            "learning_rate": 0.0001
+        }
+    }
+    
+    result = create_training_session(session_data)
+    print(f"Created training session: {result['data']['session']['id']}")
+```
+
+### JavaScript Example
+
+```javascript
+const API_BASE_URL = 'https://api.cotrain.network/v1';
+const API_KEY = 'your-api-key-here';
+
+const headers = {
+    'Authorization': `Bearer ${API_KEY}`,
+    'Content-Type': 'application/json'
+};
+
+// Get user contribution
+async function getUserContribution(walletAddress) {
+    const response = await fetch(`${API_BASE_URL}/users/${walletAddress}/contribution`, {
+        headers
+    });
+    return await response.json();
+}
+
+// Get model training progress
+async function getModelProgress(modelId) {
+    const response = await fetch(`${API_BASE_URL}/models/${modelId}/progress`, {
+        headers
+    });
+    return await response.json();
+}
+
+// Create training session
+async function createTrainingSession(sessionData) {
+    const response = await fetch(`${API_BASE_URL}/training`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(sessionData)
+    });
+    return await response.json();
+}
+
+// Example usage
+async function main() {
+    try {
+        // Check user contribution
+        const contribution = await getUserContribution('0xabc123...');
+        console.log(`User has contributed ${contribution.data.total_gpu_hours} GPU hours`);
+        
+        // Check model progress
+        const progress = await getModelProgress('llama2-42b');
+        console.log(`Model training is ${progress.data.percent_complete}% complete`);
+        
+        // Create new training session
+        const sessionData = {
+            name: 'My AI Model',
+            description: 'Training a custom transformer model',
+            model_type: 'transformer',
+            dataset_url: 'https://example.com/dataset.zip',
+            config: {
+                epochs: 5,
+                batch_size: 16,
+                learning_rate: 0.0001
+            }
+        };
+        
+        const result = await createTrainingSession(sessionData);
+        console.log(`Created training session: ${result.data.session.id}`);
+    } catch (error) {
+        console.error('API Error:', error);
+    }
+}
+
+main();
+```
+
+---
+
+## 🚨 Error Codes
+
+| Code | Description | HTTP Status |
+|------|-------------|-------------|
+| `VALIDATION_ERROR` | Request validation failed | 400 |
+| `UNAUTHORIZED` | Invalid or missing authentication | 401 |
+| `FORBIDDEN` | Insufficient permissions | 403 |
+| `NOT_FOUND` | Resource not found | 404 |
+| `RATE_LIMITED` | Too many requests | 429 |
+| `INTERNAL_ERROR` | Server error | 500 |
+| `SERVICE_UNAVAILABLE` | Service temporarily unavailable | 503 |
+| `BLOCKCHAIN_ERROR` | Blockchain transaction failed | 502 |
+| `INSUFFICIENT_FUNDS` | Not enough CTN tokens | 402 |
+| `SESSION_EXPIRED` | Training session has expired | 410 |
+
+---
+
+## 📚 Additional Resources
+
+- [SDK Documentation](/docs/sdk) - Language-specific SDKs
+- [Quickstart Guide](/docs/quickstart) - Get started quickly
+- [Tokenomics](/docs/tokenomics) - Understanding CTN tokens
+- [Security](/docs/development#security-framework) - BTARD protocol details
+
+For support, join our [Discord community](https://discord.gg/cotrain) or email [support@cotrain.network](mailto:support@cotrain.network).
+
+**Request Body:**
+
+```json
+{
+  "name": "My Training Session",
+  "description": "Training a transformer model for text generation",
+  "model_config": {
+    "architecture": "transformer",
+    "parameters": {
+      "layers": 12,
+      "hidden_size": 768,
+      "attention_heads": 12
+    }
+  },
+  "dataset_url": "s3://bucket/dataset",
+  "epochs": 3,
+  "batch_size": 32,
+  "learning_rate": 0.0001,
+  "max_participants": 10,
+  "reward_per_epoch": 100
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "My Training Session",
+  "status": "pending",
+  "created_at": "2024-01-15T10:30:00Z",
+  "estimated_completion": "2024-01-15T14:30:00Z",
+  "participants_count": 0,
+  "total_reward": 300
+}
+```
+
+### Get Training Sessions
+
+```http
+GET /api/training
+```
+
+Retrieve all training sessions with pagination.
+
+**Query Parameters:**
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10)
+- `status` (optional): Filter by status (pending, active, completed, failed)
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "My Training Session",
+      "status": "active",
+      "progress": 45.5,
+      "participants_count": 8,
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "meta": {
+    "total": 25,
+    "page": 1,
+    "limit": 10,
+    "pages": 3
+  }
+}
+```
+
+### Get Training Jobs
+
+Retrieve a list of training jobs for the authenticated user.
+
+**Endpoint:** `GET /training/jobs`
+
+**Query Parameters:**
+- `status` (optional): Filter by job status (`pending`, `running`, `completed`, `failed`, `cancelled`)
+- `limit` (optional): Number of jobs to return (default: 20, max: 100)
+- `offset` (optional): Number of jobs to skip (default: 0)
+- `sort` (optional): Sort order (`created_at`, `-created_at`, `cost`, `-cost`)
+
+**Example Request:**
+```bash
+GET /training/jobs?status=running&limit=10&sort=-created_at
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "jobs": [
+      {
+        "job_id": "job_abc123def456",
+        "name": "My Training Job",
+        "status": "running",
+        "progress": 0.45,
+        "current_epoch": 4,
+        "total_epochs": 10,
+        "cost_ctn": 342.18,
+        "created_at": "2024-01-15T10:30:00Z",
+        "started_at": "2024-01-15T10:35:00Z",
+        "estimated_completion": "2024-01-16T10:30:00Z"
+      }
+    ],
+    "total_count": 25,
+    "has_more": true
+  }
+}
+```
+
+### Get Training Job Details
+
+Retrieve detailed information about a specific training job.
+
+**Endpoint:** `GET /training/jobs/{job_id}`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_abc123def456",
+    "name": "My Training Job",
+    "description": "Training a transformer model",
+    "status": "running",
+    "progress": 0.45,
+    "config": {
+      "model_type": "transformer",
+      "model_size": "7B",
+      "epochs": 10,
+      "batch_size": 32,
+      "learning_rate": 1e-4
+    },
+    "metrics": {
+      "current_epoch": 4,
+      "training_loss": 2.1543,
+      "validation_loss": 2.2891,
+      "training_accuracy": 0.7234,
+      "validation_accuracy": 0.6987,
+      "learning_rate": 8.5e-5,
+      "samples_per_second": 1250.3
+    },
+    "resources": {
+      "assigned_nodes": 8,
+      "total_gpus": 32,
+      "gpu_utilization": 0.89,
+      "memory_utilization": 0.76,
+      "network_utilization": 0.34
+    },
+    "cost": {
+      "current_cost_ctn": 342.18,
+      "estimated_total_cost_ctn": 856.32,
+      "cost_breakdown": {
+        "compute": 298.45,
+        "storage": 23.67,
+        "network": 20.06
+      }
+    },
+    "security": {
+      "byzantine_events": 0,
+      "gradient_anomalies": 2,
+      "validator_consensus": 0.95,
+      "security_score": 0.98
+    },
+    "timestamps": {
+      "created_at": "2024-01-15T10:30:00Z",
+      "started_at": "2024-01-15T10:35:00Z",
+      "estimated_completion": "2024-01-16T10:30:00Z"
+    }
+  }
+}
+```
+
+### Monitor Training Progress
+
+Get real-time training progress updates via Server-Sent Events (SSE).
+
+**Endpoint:** `GET /training/jobs/{job_id}/monitor`
+
+**Headers:**
+```
+Accept: text/event-stream
+Cache-Control: no-cache
+```
+
+**Example Response Stream:**
+```
+data: {"event": "progress", "epoch": 5, "loss": 2.0234, "accuracy": 0.7456, "timestamp": "2024-01-15T11:00:00Z"}
+
+data: {"event": "metrics", "gpu_utilization": 0.91, "memory_usage": 0.78, "timestamp": "2024-01-15T11:01:00Z"}
+
+data: {"event": "security", "validator_consensus": 0.96, "anomalies_detected": 0, "timestamp": "2024-01-15T11:02:00Z"}
+
+data: {"event": "completed", "final_loss": 1.8765, "final_accuracy": 0.8234, "total_cost_ctn": 823.45, "timestamp": "2024-01-15T22:30:00Z"}
+```
+
+### Cancel Training Job
+
+Cancel a running or pending training job.
+
+**Endpoint:** `DELETE /training/jobs/{job_id}`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_abc123def456",
+    "status": "cancelled",
+    "refund_amount_ctn": 234.56,
+    "cancelled_at": "2024-01-15T15:30:00Z"
+  }
+}
+```
+
+### Download Trained Model
+
+Get a download URL for the trained model artifacts.
+
+**Endpoint:** `GET /training/jobs/{job_id}/model`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "download_url": "https://models.cotrain.ai/job_abc123def456/model.tar.gz",
+    "expires_at": "2024-01-16T10:30:00Z",
+    "file_size_bytes": 13958643712,
+    "checksum": "sha256:a1b2c3d4e5f6...",
+    "model_format": "pytorch",
+    "metadata": {
+      "model_type": "transformer",
+      "parameters": 7000000000,
+      "precision": "fp16"
+    }
+  }
+}
+```
+
+---
+
+## 🔗 Blockchain API
+
+### Create Training Session on Blockchain
+
+```http
+POST /api/blockchain/sessions
+```
+
+Create a new training session on the Aptos blockchain.
+
+**Request Body:**
+
+```json
+{
+  "name": "Transformer Training Session",
+  "description": "Large language model training",
+  "max_participants": 20,
+  "reward_per_participant": 50,
+  "duration_hours": 24,
+  "model_hash": "0x1234567890abcdef",
+  "dataset_hash": "0xfedcba0987654321"
+}
+```
+
+**Response:**
+
+```json
+{
+  "transaction_hash": "0xabc123def456",
+  "session_id": "session_001",
+  "status": "pending",
+  "gas_used": 1250,
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Register Participant
+
+```http
+POST /api/blockchain/participants
+```
+
+Register a participant for a training session.
+
+**Request Body:**
+
+```json
+{
+  "session_id": "session_001",
+  "participant_address": "0x1::account::address",
+  "compute_power": 1000,
+  "stake_amount": 100
+}
+```
+
+**Response:**
+
+```json
+{
+  "transaction_hash": "0xdef456abc123",
+  "participant_id": "participant_001",
+  "status": "registered",
+  "stake_locked": true
+}
+```
+
+### Get Model Details
+
+Retrieve detailed information about a specific model.
+
+**Endpoint:** `GET /models/{model_id}`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "model_id": "model_gpt7b_v1",
+    "name": "GPT-7B",
+    "description": "7 billion parameter transformer model trained on diverse text data",
+    "category": "language",
+    "size": "large",
+    "parameters": 7000000000,
+    "architecture": "transformer",
+    "framework": "pytorch",
+    "precision": "fp16",
+    "public": true,
+    "owner": "cotrain-official",
+    "license": "MIT",
+    "downloads": 15420,
+    "rating": 4.8,
+    "file_size_bytes": 13958643712,
+    "capabilities": [
+      "text-generation",
+      "text-completion",
+      "question-answering"
+    ],
+    "supported_tasks": [
+      "language-modeling",
+      "text-classification",
+      "summarization"
+    ],
+    "performance_metrics": {
+      "perplexity": 12.34,
+      "bleu_score": 0.78,
+      "rouge_score": 0.82
+    },
+    "training_info": {
+      "dataset_size": "500GB",
+      "training_time_hours": 240,
+      "training_cost_ctn": 12500
+    },
+    "created_at": "2024-01-10T08:00:00Z",
+    "updated_at": "2024-01-12T14:30:00Z"
+  }
+}
+```
+
+### Deploy Model
+
+Deploy a model for inference on the CoTrain network.
+
+**Endpoint:** `POST /models/{model_id}/deploy`
+
+**Request Body:**
+```json
+{
+  "deployment_config": {
+    "name": "my-gpt-deployment",
+    "description": "GPT model for text generation",
+    "max_requests_per_second": 100,
+    "auto_scaling": true,
+    "min_replicas": 1,
+    "max_replicas": 10,
+    "gpu_type": "A100",
+    "memory_gb": 40
+  },
+  "inference_config": {
+    "max_tokens": 2048,
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "batch_size": 8
+  },
+  "pricing": {
+    "price_per_request_ctn": 0.01,
+    "price_per_token_ctn": 0.0001
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "deployment_id": "deploy_xyz789abc123",
+    "endpoint_url": "https://inference.cotrain.ai/v1/deployments/deploy_xyz789abc123",
+    "api_key": "sk-deploy-xyz789abc123...",
+    "status": "deploying",
+    "estimated_ready_time": "2024-01-15T11:00:00Z",
+    "created_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+### Model Inference
+
+Make inference requests to deployed models.
+
+**Endpoint:** `POST /inference/deployments/{deployment_id}/generate`
+
+**Request Body:**
+```json
+{
+  "prompt": "The future of artificial intelligence is",
+  "max_tokens": 100,
+  "temperature": 0.7,
+  "top_p": 0.9,
+  "stop": ["\n\n"],
+  "stream": false
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "inference_req_123456",
+    "generated_text": "The future of artificial intelligence is bright and full of possibilities. As we continue to advance in machine learning and neural networks, we're seeing unprecedented capabilities in natural language processing, computer vision, and autonomous systems.",
+    "tokens_generated": 45,
+    "cost_ctn": 0.0045,
+    "processing_time_ms": 234,
+    "model_info": {
+      "model_id": "model_gpt7b_v1",
+      "version": "1.0.0"
+    }
+  }
+}
+```
+
+---
+
+## 🔐 Authentication API
+
+### Register User
+
+```http
+POST /api/auth/register
+```
+
+Register a new user account.
+
+**Request Body:**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123",
+  "username": "myusername",
+  "wallet_address": "0x1::account::address"
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "User registered successfully",
+  "user": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "user@example.com",
+    "username": "myusername",
+    "created_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+### Login
+
+```http
+POST /api/auth/login
+```
+
+Authenticate user with email and password.
+
+**Request Body:**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123"
+}
+```
+
+**Response:**
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 3600,
+  "user": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "user@example.com",
+    "username": "myusername"
+  }
+}
+```
+
+### Wallet Login
+
+```http
+POST /api/auth/wallet-login
+```
+
+Authenticate using wallet signature.
+
+**Request Body:**
+
+```json
+{
+  "wallet_address": "0x1::account::address",
+  "signature": "0xsignature_data",
+  "message": "Login to CoTrain",
+  "public_key": "0xpublic_key"
+}
+```
+
+### Get Transaction History
+
+Retrieve transaction history for the authenticated wallet.
+
+**Endpoint:** `GET /wallet/transactions`
+
+**Query Parameters:**
+- `type` (optional): Filter by transaction type (`training`, `staking`, `governance`, `transfer`)
+- `limit` (optional): Number of transactions to return (default: 20)
+- `offset` (optional): Number of transactions to skip
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "transactions": [
+      {
+        "transaction_id": "tx_abc123def456",
+        "type": "training",
+        "amount_ctn": -856.32,
+        "description": "Training job payment",
+        "job_id": "job_abc123def456",
+        "status": "confirmed",
+        "block_height": 12345678,
+        "timestamp": "2024-01-15T10:30:00Z"
+      },
+      {
+        "transaction_id": "tx_def456ghi789",
+        "type": "staking_reward",
+        "amount_ctn": 12.45,
+        "description": "Weekly staking rewards",
+        "status": "confirmed",
+        "block_height": 12345650,
+        "timestamp": "2024-01-14T08:00:00Z"
+      }
+    ],
+    "total_count": 156,
+    "has_more": true
+  }
+}
+```
+
+### Stake Tokens
+
+Stake CTN tokens to earn rewards and participate in governance.
+
+**Endpoint:** `POST /wallet/stake`
+
+**Request Body:**
+```json
+{
+  "amount_ctn": 1000.0,
+  "duration_days": 90,
+  "auto_restake": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "stake_id": "stake_abc123def456",
+    "amount_ctn": 1000.0,
+    "duration_days": 90,
+    "annual_yield": 0.08,
+    "expected_rewards_ctn": 19.73,
+    "unlock_date": "2024-04-14T10:30:00Z",
+    "transaction_id": "tx_stake_abc123",
+    "created_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+### Unstake Tokens
+
+Unstake CTN tokens (subject to lock period).
+
+**Endpoint:** `POST /wallet/unstake`
+
+**Request Body:**
+```json
+{
+  "stake_id": "stake_abc123def456",
+  "amount_ctn": 500.0
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "unstake_id": "unstake_def456ghi789",
+    "amount_ctn": 500.0,
+    "unlock_date": "2024-01-22T10:30:00Z",
+    "early_withdrawal_penalty": 0.02,
+    "penalty_amount_ctn": 10.0,
+    "net_amount_ctn": 490.0,
+    "transaction_id": "tx_unstake_def456",
+    "created_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+---
+
+## 🗳️ Governance API
+
+### Get Active Proposals
+
+Retrieve currently active governance proposals.
+
+**Endpoint:** `GET /governance/proposals`
+
+**Query Parameters:**
+- `status` (optional): Filter by status (`active`, `pending`, `executed`, `rejected`)
+- `category` (optional): Filter by category (`parameter`, `upgrade`, `treasury`, `general`)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "proposals": [
+      {
+        "proposal_id": "prop_001",
+        "title": "Increase Base GPU Reward Rate",
+        "description": "Proposal to increase the base GPU reward rate from 0.5 to 0.575 CTN per hour",
+        "category": "parameter",
+        "status": "active",
+        "proposer": "0x1234567890abcdef...",
+        "voting_power_required": 1000000,
+        "votes": {
+          "for": 650000,
+          "against": 350000,
+          "abstain": 50000
+        },
+        "voting_deadline": "2024-01-20T23:59:59Z",
+        "execution_deadline": "2024-01-25T23:59:59Z",
+        "created_at": "2024-01-10T10:00:00Z"
+      }
+    ],
+    "total_count": 5
+  }
+}
+```
+
+### Get Proposal Details
+
+Retrieve detailed information about a specific proposal.
+
+**Endpoint:** `GET /governance/proposals/{proposal_id}`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "proposal_id": "prop_001",
+    "title": "Increase Base GPU Reward Rate",
+    "description": "Proposal to increase the base GPU reward rate from 0.5 to 0.575 CTN per hour to attract more GPU contributors to the network.",
+    "category": "parameter",
+    "status": "active",
+    "proposer": {
+      "address": "0x1234567890abcdef...",
+      "reputation": 0.95,
+      "stake_amount": 50000
+    },
+    "parameters": {
+      "current_value": 0.5,
+      "proposed_value": 0.575,
+      "parameter_name": "base_gpu_reward_rate"
+    },
+    "voting_info": {
+      "voting_power_required": 1000000,
+      "quorum_required": 0.4,
+      "approval_threshold": 0.6,
+      "current_participation": 0.52
+    },
+    "votes": {
+      "for": {
+        "count": 650000,
+        "percentage": 0.62
+      },
+      "against": {
+        "count": 350000,
+        "percentage": 0.33
+      },
+      "abstain": {
+        "count": 50000,
+        "percentage": 0.05
+      }
+    },
+    "timeline": {
+      "created_at": "2024-01-10T10:00:00Z",
+      "voting_starts": "2024-01-12T10:00:00Z",
+      "voting_deadline": "2024-01-20T23:59:59Z",
+      "execution_deadline": "2024-01-25T23:59:59Z"
+    },
+    "impact_analysis": {
+      "estimated_cost_increase": "15% increase in reward payouts",
+      "expected_node_increase": "25% more GPU nodes",
+      "treasury_impact": "-50,000 CTN per month"
+    }
+  }
+}
+```
+
+### Vote on Proposal
+
+Cast a vote on an active governance proposal.
+
+**Endpoint:** `POST /governance/proposals/{proposal_id}/vote`
+
+**Request Body:**
+```json
+{
+  "vote": "for",
+  "voting_power": 1000,
+  "reason": "This will help attract more GPU contributors and improve network capacity"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "vote_id": "vote_abc123def456",
+    "proposal_id": "prop_001",
+    "vote": "for",
+    "voting_power": 1000,
+    "transaction_id": "tx_vote_abc123",
+    "timestamp": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+### Create Proposal
+
+Create a new governance proposal (requires minimum stake).
+
+**Endpoint:** `POST /governance/proposals`
+
+**Request Body:**
+```json
+{
+  "title": "Implement New Security Protocol",
+  "description": "Proposal to implement enhanced Byzantine fault tolerance mechanisms",
+  "category": "upgrade",
+  "proposal_type": "code_upgrade",
+  "parameters": {
+    "upgrade_version": "2.1.0",
+    "implementation_timeline": "30 days"
+  },
+  "stake_amount": 10000,
+  "voting_duration_days": 7,
+  "execution_delay_days": 3
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "proposal_id": "prop_002",
+    "status": "pending",
+    "review_period_ends": "2024-01-17T10:30:00Z",
+    "voting_starts": "2024-01-18T10:30:00Z",
+    "voting_deadline": "2024-01-25T10:30:00Z",
+    "stake_transaction_id": "tx_stake_prop_002",
+    "created_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+---
+
+## 👥 Contributors API
+
+### Create Contributor Profile
+
+```http
+POST /api/contributors
+```
+
+Create a new contributor profile.
+
+**Headers:**
+- `Authorization: Bearer <jwt_token>`
+
+**Request Body:**
+
+```json
+{
+  "hardware_specs": {
+    "gpu_model": "NVIDIA RTX 4090",
+    "gpu_memory_gb": 24,
+    "cpu_cores": 16,
+    "ram_gb": 64,
+    "storage_gb": 2000,
+    "network_speed_mbps": 1000
+  },
+  "availability_hours": 8,
+  "hourly_rate_ctn": 10,
+  "location": "US-West",
+  "bio": "Experienced ML engineer with high-end hardware"
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "pending",
+  "reputation_score": 0,
+  "total_earnings": 0,
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+### Get Contributors
+
+```http
+GET /api/contributors
+```
+
+Retrieve all contributors with filtering options.
+
+**Query Parameters:**
+- `status` (optional): Filter by status (pending, active, inactive, suspended)
+- `location` (optional): Filter by location
+- `min_reputation` (optional): Minimum reputation score
+- `page` (optional): Page number
+- `limit` (optional): Items per page
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "user": {
+        "username": "gpu_master",
+        "email": "user@example.com"
+      },
+      "status": "active",
+      "reputation_score": 95.5,
+      "total_earnings": 1250.75,
+      "hardware_specs": {
+        "gpu_model": "NVIDIA RTX 4090",
+        "gpu_memory_gb": 24
+      },
+      "availability_hours": 8,
+      "hourly_rate_ctn": 10
+    }
+  ],
+  "meta": {
+    "total": 156,
+    "page": 1,
+    "limit": 10,
+    "pages": 16
+  }
+}
+```
+
+### Get Contributor Profile
+
+Retrieve detailed profile information for a specific contributor.
+
+**Endpoint:** `GET /contributors/{contributor_id}`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "contributor_id": "contrib_abc123",
+    "address": "0x1234567890abcdef...",
+    "profile": {
+      "name": "GPU Farm Alpha",
+      "description": "High-performance GPU cluster for AI training",
+      "website": "https://gpufarm-alpha.com",
+      "contact_email": "contact@gpufarm-alpha.com"
+    },
+    "status": "active",
+    "reputation": {
+      "score": 0.98,
+      "rank": 15,
+      "reviews_count": 1250,
+      "average_rating": 4.9
+    },
+    "earnings": {
+      "total_ctn": 15420.75,
+      "this_month_ctn": 1250.30,
+      "last_payout_ctn": 125.45,
+      "last_payout_date": "2024-01-14T08:00:00Z"
+    },
+    "hardware": {
+      "gpus": [
+        {
+          "type": "RTX 4090",
+          "count": 8,
+          "memory_gb": 24,
+          "compute_capability": 8.9,
+          "utilization": 0.89
+        }
+      ],
+      "cpu": {
+        "model": "AMD EPYC 7742",
+        "cores": 64,
+        "threads": 128
+      },
+      "memory_gb": 512,
+      "storage_tb": 20,
+      "network_gbps": 10
+    },
+    "performance": {
+      "uptime_percentage": 0.995,
+      "jobs_completed": 1250,
+      "jobs_failed": 5,
+      "average_job_duration_hours": 8.5,
+      "response_time_ms": 45,
+      "throughput_samples_per_second": 1250.3
+    },
+    "location": {
+      "region": "us-west-2",
+      "country": "US",
+      "city": "Seattle",
+      "timezone": "America/Los_Angeles"
+    },
+    "availability": {
+      "schedule": "24/7",
+      "maintenance_window": "Sunday 02:00-04:00 UTC",
+      "next_maintenance": "2024-01-21T02:00:00Z"
+    },
+    "joined_at": "2023-06-15T08:00:00Z",
+    "last_active": "2024-01-15T10:25:00Z"
+  }
+}
+```
+
+### Register as Contributor
+
+Register a new GPU node as a contributor to the network.
+
+**Endpoint:** `POST /contributors/register`
+
+**Request Body:**
+```json
+{
+  "profile": {
+    "name": "My GPU Node",
+    "description": "High-performance GPU for AI training",
+    "contact_email": "node@example.com"
+  },
+  "hardware": {
+    "gpus": [
+      {
+        "type": "RTX 4090",
+        "count": 4,
+        "memory_gb": 24,
+        "compute_capability": 8.9
+      }
+    ],
+    "cpu_cores": 32,
+    "memory_gb": 128,
+    "storage_tb": 5,
+    "network_gbps": 1
+  },
+  "location": {
+    "region": "us-east-1",
+    "country": "US",
+    "timezone": "America/New_York"
+  },
+  "availability": {
+    "schedule": "24/7",
+    "maintenance_window": "Sunday 03:00-05:00 UTC"
+  },
+  "pricing": {
+    "base_rate_ctn_per_hour": 0.5,
+    "premium_multiplier": 1.5
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "contributor_id": "contrib_xyz789",
+    "status": "pending_verification",
+    "verification_token": "verify_abc123def456",
+    "setup_instructions": {
+      "download_url": "https://downloads.cotrain.ai/node-setup.sh",
+      "config_file": "https://config.cotrain.ai/contrib_xyz789.yaml",
+      "documentation": "https://docs.cotrain.ai/contributor-setup"
+    },
+    "estimated_approval_time": "24-48 hours",
+    "created_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+---
+
+## 📊 Analytics API
+
+### Get Network Statistics
+
+Retrieve overall network statistics and metrics.
+
+**Endpoint:** `GET /analytics/network`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "network_overview": {
+      "total_contributors": 2847,
+      "active_contributors": 2654,
+      "total_gpus": 45632,
+      "active_gpus": 42891,
+      "total_compute_hours": 1250000,
+      "jobs_completed": 15420,
+      "jobs_running": 234,
+      "average_uptime": 0.987
+    },
+    "token_metrics": {
+      "total_supply": 1000000000,
+      "circulating_supply": 450000000,
+      "staked_tokens": 125000000,
+      "treasury_balance": 75000000,
+      "total_rewards_distributed": 25000000
+    },
+    "training_metrics": {
+      "models_trained": 8750,
+      "total_parameters_trained": "2.5T",
+      "average_training_time_hours": 12.5,
+      "success_rate": 0.987,
+      "total_cost_ctn": 5250000
+    },
+    "geographic_distribution": {
+      "us-west-2": 1250,
+      "us-east-1": 980,
+      "eu-west-1": 750,
+      "ap-southeast-1": 450,
+      "other": 417
+    },
+    "last_updated": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+### Get Training Analytics
+
+Retrieve analytics data for training jobs.
+
+**Endpoint:** `GET /analytics/training`
+
+**Query Parameters:**
+- `period` (optional): Time period (`24h`, `7d`, `30d`, `90d`, `1y`)
+- `model_type` (optional): Filter by model type
+- `user_id` (optional): Filter by specific user
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "summary": {
+      "total_jobs": 1250,
+      "completed_jobs": 1187,
+      "failed_jobs": 45,
+      "cancelled_jobs": 18,
+      "success_rate": 0.95,
+      "average_duration_hours": 8.5,
+      "total_cost_ctn": 125000
+    },
+    "trends": {
+      "daily_jobs": [
+        {"date": "2024-01-14", "count": 45, "success_rate": 0.96},
+        {"date": "2024-01-15", "count": 52, "success_rate": 0.94}
+      ],
+      "model_types": {
+        "transformer": 750,
+        "cnn": 320,
+        "rnn": 180
+      },
+      "cost_distribution": {
+        "0-100": 450,
+        "100-500": 520,
+        "500-1000": 180,
+        "1000+": 100
+      }
+    },
+    "performance_metrics": {
+      "average_gpu_utilization": 0.87,
+      "average_memory_utilization": 0.76,
+      "average_network_utilization": 0.34,
+      "throughput_samples_per_second": 1250.3
+    }
+  }
+}
+```
+
+---
+
+## 🔍 Search API
+
+### Search Models
+
+Search for models using various criteria.
+
+**Endpoint:** `GET /search/models`
+
+**Query Parameters:**
+- `q` (required): Search query
+- `category` (optional): Model category filter
+- `size` (optional): Model size filter
+- `sort` (optional): Sort by (`relevance`, `downloads`, `rating`, `date`)
+- `limit` (optional): Number of results (default: 20)
+
+**Example Request:**
+```bash
+GET /search/models?q=transformer%20language&category=language&sort=downloads&limit=10
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "results": [
+      {
+        "model_id": "model_gpt7b_v1",
+        "name": "GPT-7B",
+        "description": "7 billion parameter transformer model",
+        "category": "language",
+        "downloads": 15420,
+        "rating": 4.8,
+        "relevance_score": 0.95,
+        "owner": "cotrain-official",
+        "created_at": "2024-01-10T08:00:00Z"
+      }
+    ],
+    "total_count": 156,
+    "search_time_ms": 45,
+    "suggestions": [
+      "transformer language model",
+      "gpt transformer",
+      "language generation"
+    ]
+  }
+}
+```
+
+### Search Contributors
+
+Search for contributors based on various criteria.
+
+**Endpoint:** `GET /search/contributors`
+
+**Query Parameters:**
+- `region` (optional): Geographic region
+- `gpu_type` (optional): GPU type filter
+- `min_reputation` (optional): Minimum reputation score
+- `availability` (optional): Availability status
+- `sort` (optional): Sort by (`reputation`, `price`, `performance`)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "results": [
+      {
+        "contributor_id": "contrib_abc123",
+        "name": "GPU Farm Alpha",
+        "reputation": 0.98,
+        "gpu_count": 8,
+        "gpu_type": "RTX 4090",
+        "region": "us-west-2",
+        "price_per_hour_ctn": 0.5,
+        "availability": "available",
+        "response_time_ms": 45
+      }
+    ],
+    "total_count": 234,
+    "filters_applied": {
+      "region": "us-west-2",
+      "min_reputation": 0.9
+    }
+  }
+}
+```
+
+---
+
+## 🚨 Error Codes
+
+CoTrain API uses conventional HTTP response codes to indicate the success or failure of an API request.
+
+### HTTP Status Codes
+
+| Code | Description |
+|------|-------------|
+| `200` | OK - Request successful |
+| `201` | Created - Resource created successfully |
+| `400` | Bad Request - Invalid request parameters |
+| `401` | Unauthorized - Invalid or missing authentication |
+| `403` | Forbidden - Insufficient permissions |
+| `404` | Not Found - Resource not found |
+| `409` | Conflict - Resource already exists |
+| `422` | Unprocessable Entity - Validation error |
+| `429` | Too Many Requests - Rate limit exceeded |
+| `500` | Internal Server Error - Server error |
+| `503` | Service Unavailable - Service temporarily unavailable |
+
+### Error Response Format
+
+All error responses follow this format:
+
+```json
+{
+  "statusCode": 400,
+  "message": "Validation failed",
+  "error": "Bad Request",
+  "details": [
+    {
+      "field": "email",
+      "message": "Email must be a valid email address"
+    },
+    {
+      "field": "password",
+      "message": "Password must be at least 8 characters long"
+    }
+  ],
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "path": "/api/auth/register"
+}
+```
+
+### Common Error Codes
+
+| Error Code | Description |
+|------------|-------------|
+| `USER_ALREADY_EXISTS` | User with this email already exists |
+| `INVALID_CREDENTIALS` | Invalid email or password |
+| `TOKEN_EXPIRED` | JWT token has expired |
+| `INSUFFICIENT_PERMISSIONS` | User lacks required permissions |
+| `TRAINING_SESSION_NOT_FOUND` | Training session does not exist |
+| `CONTRIBUTOR_PROFILE_EXISTS` | User already has a contributor profile |
+| `BLOCKCHAIN_TRANSACTION_FAILED` | Blockchain transaction failed |
+| `INSUFFICIENT_BALANCE` | Insufficient CTN token balance |
+| `HARDWARE_VERIFICATION_FAILED` | Hardware specs verification failed |
+
+### Common Error Codes
+
+| Code | Description | Resolution |
+|------|-------------|------------|
+| `INVALID_API_KEY` | API key is invalid or expired | Check your API key in the dashboard |
+| `INSUFFICIENT_BALANCE` | Not enough CTN tokens | Add funds to your wallet |
+| `INVALID_MODEL_TYPE` | Unsupported model type | Use a supported model type |
+| `RESOURCE_NOT_FOUND` | Requested resource doesn't exist | Check the resource ID |
+| `RATE_LIMIT_EXCEEDED` | Too many requests | Wait before making more requests |
+| `VALIDATION_ERROR` | Request validation failed | Check request parameters |
+| `NETWORK_CONGESTION` | Network is congested | Try again later or increase priority |
+| `INSUFFICIENT_NODES` | Not enough available nodes | Wait for more nodes or adjust requirements |
+
+---
+
+## 📚 SDK Examples
+
+### Python SDK
+
+```python
+import cotrain
+
+# Initialize client
+client = cotrain.CoTrainClient(
+    api_key="your-api-key",
+    network="mainnet"
+)
+
+# Submit training job
+job = client.training.submit({
+    "model_type": "transformer",
+    "dataset_path": "s3://my-bucket/data",
+    "epochs": 10
+})
+
+# Monitor progress
+for update in client.training.monitor(job.id):
+    print(f"Epoch {update.epoch}: Loss = {update.loss}")
+```
+
+### JavaScript SDK
+
+```javascript
+import { CoTrainClient } from '@cotrain/sdk';
+
+const client = new CoTrainClient({
+  apiKey: 'your-api-key',
+  network: 'mainnet'
+});
+
+// Submit training job
+const job = await client.training.submit({
+  modelType: 'transformer',
+  datasetPath: 's3://my-bucket/data',
+  epochs: 10
+});
+
+// Monitor progress
+for await (const update of client.training.monitor(job.id)) {
+  console.log(`Epoch ${update.epoch}: Loss = ${update.loss}`);
+}
+```
+
+### cURL Examples
+
+```bash
+# Submit training job
+curl -X POST https://api.cotrain.ai/v1/training/jobs \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "config": {
+      "model_type": "transformer",
+      "epochs": 10,
+      "batch_size": 32
+    },
+    "resources": {
+      "max_cost_ctn": 1000
+    }
+  }'
+
+# Get job status
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+     https://api.cotrain.ai/v1/training/jobs/job_abc123def456
+
+# Monitor job progress (SSE)
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Accept: text/event-stream" \
+     https://api.cotrain.ai/v1/training/jobs/job_abc123def456/monitor
+```
+
+---
+
+## 🔗 Webhooks
+
+### Webhook Events
+
+CoTrain can send webhook notifications for various events:
+
+| Event | Description |
+|-------|-------------|
+| `training.job.started` | Training job has started |
+| `training.job.completed` | Training job completed successfully |
+| `training.job.failed` | Training job failed |
+| `training.job.cancelled` | Training job was cancelled |
+| `training.progress.update` | Training progress update |
+| `wallet.transaction.confirmed` | Transaction confirmed on blockchain |
+| `governance.proposal.created` | New governance proposal created |
+| `governance.vote.cast` | Vote cast on proposal |
+| `contributor.status.changed` | Contributor status changed |
+
+### Webhook Configuration
+
+```bash
+# Configure webhook endpoint
+curl -X POST https://api.cotrain.ai/v1/webhooks \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-app.com/webhooks/cotrain",
+    "events": ["training.job.completed", "training.job.failed"],
+    "secret": "your-webhook-secret"
+  }'
+```
+
+### Webhook Payload Example
+
+```json
+{
+  "event": "training.job.completed",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "data": {
+    "job_id": "job_abc123def456",
+    "status": "completed",
+    "final_metrics": {
+      "loss": 1.8765,
+      "accuracy": 0.8234
+    },
+    "cost_ctn": 823.45,
+    "duration_hours": 8.5,
+    "model_download_url": "https://models.cotrain.ai/job_abc123def456/model.tar.gz"
+  },
+  "signature": "sha256=abc123def456..."
+}
+```
+
+---
+
+## 📈 Rate Limits
+
+### Rate Limit Headers
+
+All API responses include rate limit information:
+
+```
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 999
+X-RateLimit-Reset: 1640995200
+X-RateLimit-Window: 60
+```
+
+### Rate Limit Tiers
+
+| Tier | Requests/Minute | Burst | Training Jobs/Day |
+|------|-----------------|-------|-------------------|
+| **Free** | 100 | 200 | 5 |
+| **Pro** | 1,000 | 2,000 | 50 |
+| **Enterprise** | 10,000 | 20,000 | Unlimited |
+
+---
+
+## 🛡️ Security
+
+### API Security Best Practices
+
+1. **API Key Management**
+   - Store API keys securely
+   - Rotate keys regularly
+   - Use environment variables
+   - Never commit keys to version control
+
+2. **Request Signing**
+   - Use wallet signatures for sensitive operations
+   - Verify timestamps to prevent replay attacks
+   - Implement proper nonce handling
+
+3. **Network Security**
+   - Always use HTTPS
+   - Validate SSL certificates
+   - Implement proper timeout handling
+   - Use connection pooling
+
+4. **Data Protection**
+   - Encrypt sensitive data
+   - Implement proper access controls
+   - Log security events
+   - Regular security audits
+
+---
+
+## 📞 Support
+
+### Getting Help
+
+- **📖 Documentation**: [https://docs.cotrain.ai](https://docs.cotrain.ai)
+- **💬 Discord**: [https://discord.gg/cotrain](https://discord.gg/cotrain)
+- **📧 Email**: [api-support@cotrain.ai](mailto:api-support@cotrain.ai)
+- **🐛 Issues**: [https://github.com/cotrain-ai/api-issues](https://github.com/cotrain-ai/api-issues)
+
+### API Status
+
+- **Status Page**: [https://status.cotrain.ai](https://status.cotrain.ai)
+- **Uptime**: 99.9% SLA
+- **Response Time**: <100ms average
+- **Maintenance**: Announced 24h in advance
+
+---
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+  <div className="p-6 border rounded-lg">
+    <h3 className="text-lg font-semibold mb-2">🚀 Get Started</h3>
+    <p className="text-sm text-muted-foreground mb-4">Start using the CoTrain API today</p>
+    <a href="https://app.cotrain.ai/api-keys" className="text-blue-600 hover:text-blue-800 font-medium">Get API Key →</a>
+  </div>
+  <div className="p-6 border rounded-lg">
+    <h3 className="text-lg font-semibold mb-2">📚 SDK Documentation</h3>
+    <p className="text-sm text-muted-foreground mb-4">Explore our comprehensive SDKs</p>
+    <a href="/docs/sdk" className="text-blue-600 hover:text-blue-800 font-medium">View SDK Docs →</a>
+  </div>
+  <div className="p-6 border rounded-lg">
+    <h3 className="text-lg font-semibold mb-2">💬 Community</h3>
+    <p className="text-sm text-muted-foreground mb-4">Join our developer community</p>
+    <a href="https://discord.gg/cotrain" className="text-blue-600 hover:text-blue-800 font-medium">Join Discord →</a>
+  </div>
+</div>
+
+[Explore the SDK →](/docs/sdk) • [Check Development Guide →](/docs/development) • [View Tokenomics →](/docs/tokenomics)

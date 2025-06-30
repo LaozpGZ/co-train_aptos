@@ -1,0 +1,1108 @@
+---
+title: "Development"
+description: "Learn how to develop secure and scalable applications on the CoTrain platform."
+full: true
+---
+
+# 🛠️ Development Guide
+
+Welcome to the CoTrain development ecosystem! This guide covers everything you need to know about building secure, scalable applications on our decentralized AI training platform.
+
+---
+
+## 🏗️ Architecture Overview
+
+CoTrain's architecture is built on three core pillars:
+
+### 🔗 Blockchain Layer (Aptos)
+- **Smart Contracts**: Token management, governance, and reward distribution
+- **Transaction Processing**: Fast, parallel execution with Move language
+- **State Management**: Immutable record of all network activities
+- **Consensus**: Proof-of-Stake with Byzantine fault tolerance
+
+### 🧠 AI Training Layer
+- **Distributed Training**: Coordinated across multiple GPU nodes
+- **Model Management**: Version control and deployment pipelines
+- **Data Pipeline**: Secure, privacy-preserving data handling
+- **Inference Engine**: High-performance model serving
+
+### 🌐 Network Layer
+- **P2P Communication**: Direct node-to-node messaging
+- **Load Balancing**: Intelligent job distribution
+- **Monitoring**: Real-time network health and performance
+- **Security**: End-to-end encryption and authentication
+
+---
+
+## 🔒 Security Framework
+
+CoTrain employs multiple layers of security to ensure the integrity and safety of decentralized AI training.
+
+### 🛡️ Byzantine-Tolerant All-Reduce (BTARD)
+
+Our core security protocol protects against malicious actors in the training process:
+
+#### **CENTERED CLIP**
+- **Purpose**: Detect and mitigate gradient poisoning attacks
+- **Mechanism**: Statistical analysis of gradient distributions
+- **Threshold**: Automatically adjusts based on network conditions
+- **Action**: Clips or rejects outlier gradients
+
+```python
+def centered_clip(gradients, threshold=2.0):
+    """
+    Apply CENTERED CLIP to detect malicious gradients
+    """
+    mean_grad = torch.mean(gradients, dim=0)
+    std_grad = torch.std(gradients, dim=0)
+    
+    # Calculate z-scores for each gradient
+    z_scores = torch.abs((gradients - mean_grad) / (std_grad + 1e-8))
+    
+    # Clip gradients that exceed threshold
+    mask = z_scores > threshold
+    clipped_gradients = torch.where(mask, 
+                                   mean_grad + threshold * std_grad * torch.sign(gradients - mean_grad),
+                                   gradients)
+    
+    return clipped_gradients, mask.sum().item()
+```
+
+#### **BUTTERFLYCLIP**
+- **Purpose**: Advanced gradient aggregation with Byzantine resilience
+- **Mechanism**: Multi-round consensus with cryptographic proofs
+- **Features**: Adaptive thresholds, reputation weighting, and recovery mechanisms
+- **Performance**: Maintains training efficiency while ensuring security
+
+```python
+class ButterflyClip:
+    def __init__(self, num_workers, byzantine_ratio=0.3):
+        self.num_workers = num_workers
+        self.byzantine_threshold = int(num_workers * byzantine_ratio)
+        self.reputation_scores = torch.ones(num_workers)
+    
+    def aggregate_gradients(self, gradients, worker_ids):
+        """
+        Secure gradient aggregation using BUTTERFLYCLIP
+        """
+        # Apply reputation weighting
+        weighted_gradients = gradients * self.reputation_scores[worker_ids].unsqueeze(-1)
+        
+        # Multi-round consensus
+        consensus_gradients = self._multi_round_consensus(weighted_gradients)
+        
+        # Update reputation scores
+        self._update_reputation(gradients, consensus_gradients, worker_ids)
+        
+        return consensus_gradients
+    
+    def _multi_round_consensus(self, gradients):
+        # Implementation of multi-round Byzantine consensus
+        # This is a simplified version - actual implementation is more complex
+        median_grad = torch.median(gradients, dim=0)[0]
+        distances = torch.norm(gradients - median_grad, dim=-1)
+        
+        # Select gradients within acceptable distance
+        threshold = torch.quantile(distances, 0.7)
+        valid_mask = distances <= threshold
+        
+        return torch.mean(gradients[valid_mask], dim=0)
+    
+    def _update_reputation(self, gradients, consensus, worker_ids):
+        # Update reputation based on gradient quality
+        distances = torch.norm(gradients - consensus, dim=-1)
+        quality_scores = 1.0 / (1.0 + distances)
+        
+        # Exponential moving average for reputation
+        alpha = 0.1
+        self.reputation_scores[worker_ids] = (1 - alpha) * self.reputation_scores[worker_ids] + alpha * quality_scores
+```
+
+### 🔐 Dynamic Validator Mechanism
+
+#### **Validator Selection**
+- **Stake-based**: Higher CTN stake increases selection probability
+- **Reputation-weighted**: Historical performance affects selection
+- **Geographic distribution**: Ensures global validator coverage
+- **Rotation**: Regular validator set updates prevent centralization
+
+#### **Validation Process**
+```python
+class DynamicValidator:
+    def __init__(self, blockchain_client):
+        self.blockchain = blockchain_client
+        self.current_validators = set()
+        self.validation_history = {}
+    
+    def select_validators(self, num_validators=21):
+        """
+        Select validators based on stake, reputation, and geographic distribution
+        """
+        candidates = self.blockchain.get_validator_candidates()
+        
+        # Score each candidate
+        scores = []
+        for candidate in candidates:
+            stake_score = self._calculate_stake_score(candidate)
+            reputation_score = self._calculate_reputation_score(candidate)
+            geo_score = self._calculate_geographic_score(candidate)
+            
+            total_score = stake_score * 0.4 + reputation_score * 0.4 + geo_score * 0.2
+            scores.append((candidate, total_score))
+        
+        # Select top validators
+        scores.sort(key=lambda x: x[1], reverse=True)
+        selected = [candidate for candidate, _ in scores[:num_validators]]
+        
+        self.current_validators = set(selected)
+        return selected
+    
+    def validate_training_round(self, training_data, gradients):
+        """
+        Validate a training round using selected validators
+        """
+        validation_results = []
+        
+        for validator in self.current_validators:
+            result = self._request_validation(validator, training_data, gradients)
+            validation_results.append(result)
+        
+        # Consensus on validation results
+        consensus = self._achieve_consensus(validation_results)
+        
+        # Update validator reputation
+        self._update_validator_reputation(validation_results, consensus)
+        
+        return consensus
+```
+
+### 🔍 Cryptographic Verification
+
+#### **Zero-Knowledge Proofs**
+- **Purpose**: Prove computation correctness without revealing data
+- **Implementation**: zk-SNARKs for gradient verification
+- **Benefits**: Privacy preservation and computational integrity
+- **Performance**: Optimized circuits for ML operations
+
+#### **Merkle Tree Verification**
+- **Gradient Commitments**: Each worker commits to their gradients
+- **Batch Verification**: Efficient verification of multiple commitments
+- **Fraud Proofs**: Challenge-response system for disputed computations
+- **Audit Trail**: Complete history of all training operations
+
+```python
+import hashlib
+from typing import List, Tuple
+
+class MerkleTree:
+    def __init__(self, data: List[bytes]):
+        self.data = data
+        self.tree = self._build_tree(data)
+        self.root = self.tree[0] if self.tree else None
+    
+    def _build_tree(self, data: List[bytes]) -> List[bytes]:
+        if not data:
+            return []
+        
+        # Pad to power of 2
+        while len(data) & (len(data) - 1):
+            data.append(b'\x00' * 32)
+        
+        tree = data[:]
+        level_size = len(data)
+        
+        while level_size > 1:
+            next_level = []
+            for i in range(0, level_size, 2):
+                left = tree[-(level_size - i)]
+                right = tree[-(level_size - i - 1)]
+                parent = hashlib.sha256(left + right).digest()
+                next_level.append(parent)
+            
+            tree.extend(next_level)
+            level_size //= 2
+        
+        return tree
+    
+    def get_proof(self, index: int) -> List[Tuple[bytes, bool]]:
+        """
+        Generate Merkle proof for element at index
+        Returns list of (hash, is_right) tuples
+        """
+        if index >= len(self.data):
+            raise IndexError("Index out of range")
+        
+        proof = []
+        current_index = index
+        level_size = len(self.data)
+        tree_offset = 0
+        
+        while level_size > 1:
+            # Find sibling
+            if current_index % 2 == 0:
+                sibling_index = current_index + 1
+                is_right = True
+            else:
+                sibling_index = current_index - 1
+                is_right = False
+            
+            if sibling_index < level_size:
+                sibling_hash = self.tree[tree_offset + sibling_index]
+                proof.append((sibling_hash, is_right))
+            
+            # Move to next level
+            tree_offset += level_size
+            current_index //= 2
+            level_size //= 2
+        
+        return proof
+    
+    @staticmethod
+    def verify_proof(leaf: bytes, proof: List[Tuple[bytes, bool]], root: bytes) -> bool:
+        """
+        Verify Merkle proof
+        """
+        current_hash = leaf
+        
+        for sibling_hash, is_right in proof:
+            if is_right:
+                current_hash = hashlib.sha256(current_hash + sibling_hash).digest()
+            else:
+                current_hash = hashlib.sha256(sibling_hash + current_hash).digest()
+        
+        return current_hash == root
+
+# Example usage for gradient verification
+class GradientVerification:
+    def __init__(self):
+        self.gradient_commitments = {}
+    
+    def commit_gradients(self, worker_id: str, gradients: torch.Tensor) -> bytes:
+        """
+        Create commitment for worker's gradients
+        """
+        # Serialize gradients
+        gradient_bytes = gradients.numpy().tobytes()
+        
+        # Create Merkle tree for gradient chunks
+        chunk_size = 1024
+        chunks = [gradient_bytes[i:i+chunk_size] 
+                 for i in range(0, len(gradient_bytes), chunk_size)]
+        
+        # Pad last chunk if necessary
+        if len(chunks[-1]) < chunk_size:
+            chunks[-1] += b'\x00' * (chunk_size - len(chunks[-1]))
+        
+        # Hash each chunk
+        chunk_hashes = [hashlib.sha256(chunk).digest() for chunk in chunks]
+        
+        # Build Merkle tree
+        tree = MerkleTree(chunk_hashes)
+        
+        # Store commitment
+        self.gradient_commitments[worker_id] = {
+            'tree': tree,
+            'gradients': gradients,
+            'timestamp': time.time()
+        }
+        
+        return tree.root
+    
+    def verify_gradient_chunk(self, worker_id: str, chunk_index: int, 
+                            chunk_data: bytes, proof: List[Tuple[bytes, bool]]) -> bool:
+        """
+        Verify a specific gradient chunk using Merkle proof
+        """
+        if worker_id not in self.gradient_commitments:
+            return False
+        
+        commitment = self.gradient_commitments[worker_id]
+        tree = commitment['tree']
+        
+        # Hash the chunk
+        chunk_hash = hashlib.sha256(chunk_data).digest()
+        
+        # Verify proof
+        return MerkleTree.verify_proof(chunk_hash, proof, tree.root)
+```
+
+---
+
+## 🧪 Testing & Quality Assurance
+
+### 🔬 Security Testing
+
+#### **Adversarial Testing**
+```python
+import pytest
+import torch
+from cotrain.security import ButterflyClip, CenteredClip
+
+class TestByzantineResilience:
+    def setup_method(self):
+        self.num_workers = 10
+        self.byzantine_workers = 3
+        self.butterfly_clip = ButterflyClip(self.num_workers)
+        
+    def test_gradient_poisoning_attack(self):
+        """
+        Test resilience against gradient poisoning
+        """
+        # Generate normal gradients
+        normal_gradients = torch.randn(self.num_workers - self.byzantine_workers, 1000)
+        
+        # Generate malicious gradients (large magnitude)
+        malicious_gradients = torch.randn(self.byzantine_workers, 1000) * 100
+        
+        # Combine gradients
+        all_gradients = torch.cat([normal_gradients, malicious_gradients], dim=0)
+        worker_ids = torch.arange(self.num_workers)
+        
+        # Apply BUTTERFLYCLIP
+        aggregated = self.butterfly_clip.aggregate_gradients(all_gradients, worker_ids)
+        
+        # Verify that malicious gradients are filtered out
+        normal_mean = torch.mean(normal_gradients, dim=0)
+        distance = torch.norm(aggregated - normal_mean)
+        
+        assert distance < 10.0, "Malicious gradients not properly filtered"
+    
+    def test_model_inversion_attack(self):
+        """
+        Test protection against model inversion attacks
+        """
+        # Simulate attempt to reconstruct training data from gradients
+        # This test ensures our privacy mechanisms work
+        pass
+    
+    def test_sybil_attack_resistance(self):
+        """
+        Test resistance against Sybil attacks
+        """
+        # Simulate multiple fake identities from same attacker
+        # Verify that reputation system and stake requirements prevent this
+        pass
+
+# Performance testing
+class TestPerformance:
+    def test_training_throughput(self):
+        """
+        Test training performance under various conditions
+        """
+        # Measure training speed with different numbers of workers
+        # Ensure security mechanisms don't significantly impact performance
+        pass
+    
+    def test_scalability(self):
+        """
+        Test system scalability
+        """
+        # Test with increasing numbers of workers and data sizes
+        pass
+```
+
+### 📊 Performance Monitoring
+
+```python
+import time
+import psutil
+from dataclasses import dataclass
+from typing import Dict, List
+
+@dataclass
+class PerformanceMetrics:
+    timestamp: float
+    cpu_usage: float
+    memory_usage: float
+    gpu_usage: float
+    network_io: Dict[str, int]
+    training_throughput: float
+    security_overhead: float
+
+class PerformanceMonitor:
+    def __init__(self):
+        self.metrics_history: List[PerformanceMetrics] = []
+        self.alert_thresholds = {
+            'cpu_usage': 90.0,
+            'memory_usage': 85.0,
+            'gpu_usage': 95.0,
+            'security_overhead': 20.0
+        }
+    
+    def collect_metrics(self) -> PerformanceMetrics:
+        """
+        Collect current system performance metrics
+        """
+        # CPU and memory
+        cpu_usage = psutil.cpu_percent(interval=1)
+        memory = psutil.virtual_memory()
+        memory_usage = memory.percent
+        
+        # Network I/O
+        network = psutil.net_io_counters()
+        network_io = {
+            'bytes_sent': network.bytes_sent,
+            'bytes_recv': network.bytes_recv
+        }
+        
+        # GPU usage (requires nvidia-ml-py)
+        try:
+            import pynvml
+            pynvml.nvmlInit()
+            handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+            gpu_util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+            gpu_usage = gpu_util.gpu
+        except:
+            gpu_usage = 0.0
+        
+        metrics = PerformanceMetrics(
+            timestamp=time.time(),
+            cpu_usage=cpu_usage,
+            memory_usage=memory_usage,
+            gpu_usage=gpu_usage,
+            network_io=network_io,
+            training_throughput=self._calculate_throughput(),
+            security_overhead=self._calculate_security_overhead()
+        )
+        
+        self.metrics_history.append(metrics)
+        self._check_alerts(metrics)
+        
+        return metrics
+    
+    def _calculate_throughput(self) -> float:
+        # Calculate training samples per second
+        # Implementation depends on specific training setup
+        return 0.0
+    
+    def _calculate_security_overhead(self) -> float:
+        # Calculate percentage overhead from security mechanisms
+        # Compare performance with and without security features
+        return 0.0
+    
+    def _check_alerts(self, metrics: PerformanceMetrics):
+        """
+        Check if any metrics exceed alert thresholds
+        """
+        alerts = []
+        
+        if metrics.cpu_usage > self.alert_thresholds['cpu_usage']:
+            alerts.append(f"High CPU usage: {metrics.cpu_usage:.1f}%")
+        
+        if metrics.memory_usage > self.alert_thresholds['memory_usage']:
+            alerts.append(f"High memory usage: {metrics.memory_usage:.1f}%")
+        
+        if metrics.gpu_usage > self.alert_thresholds['gpu_usage']:
+            alerts.append(f"High GPU usage: {metrics.gpu_usage:.1f}%")
+        
+        if metrics.security_overhead > self.alert_thresholds['security_overhead']:
+            alerts.append(f"High security overhead: {metrics.security_overhead:.1f}%")
+        
+        if alerts:
+            self._send_alerts(alerts)
+    
+    def _send_alerts(self, alerts: List[str]):
+        # Send alerts to monitoring system
+        for alert in alerts:
+            print(f"ALERT: {alert}")
+```
+
+---
+
+## 🔧 Development Tools
+
+### 🛠️ CoTrain CLI
+
+```bash
+# Install CoTrain CLI
+pip install cotrain-cli
+
+# Initialize new project
+cotrain init my-ai-project
+cd my-ai-project
+
+# Configure development environment
+cotrain config set --network testnet
+cotrain config set --wallet-path ~/.cotrain/wallet.json
+
+# Deploy smart contracts
+cotrain deploy --contract training-rewards
+cotrain deploy --contract governance
+
+# Start local development node
+cotrain node start --dev-mode
+
+# Submit training job
+cotrain train submit --model-config model.yaml --data-path ./data
+
+# Monitor training progress
+cotrain train status --job-id abc123
+
+# Test security mechanisms
+cotrain security test --attack-type gradient-poisoning
+cotrain security test --attack-type model-inversion
+
+# Generate performance report
+cotrain performance report --output report.html
+```
+
+### 📚 SDK Integration
+
+#### **Python SDK**
+```python
+from cotrain import CoTrainClient, TrainingConfig, SecurityConfig
+
+# Initialize client
+client = CoTrainClient(
+    network="testnet",
+    wallet_path="~/.cotrain/wallet.json",
+    api_key="your-api-key"
+)
+
+# Configure training job
+training_config = TrainingConfig(
+    model_type="transformer",
+    model_size="7B",
+    dataset="custom-dataset",
+    epochs=10,
+    batch_size=32,
+    learning_rate=1e-4
+)
+
+# Configure security settings
+security_config = SecurityConfig(
+    enable_byzantine_tolerance=True,
+    gradient_clipping=True,
+    privacy_level="high",
+    validator_count=21
+)
+
+# Submit training job
+job = client.submit_training_job(
+    config=training_config,
+    security=security_config,
+    max_cost_ctn=1000
+)
+
+print(f"Training job submitted: {job.id}")
+
+# Monitor progress
+for update in client.monitor_job(job.id):
+    print(f"Epoch {update.epoch}: Loss = {update.loss:.4f}")
+    
+    if update.status == "completed":
+        print("Training completed successfully!")
+        break
+    elif update.status == "failed":
+        print(f"Training failed: {update.error}")
+        break
+
+# Download trained model
+model_path = client.download_model(job.id, "./models/")
+print(f"Model downloaded to: {model_path}")
+```
+
+#### **JavaScript/TypeScript SDK**
+```typescript
+import { CoTrainClient, TrainingConfig, SecurityConfig } from '@cotrain/sdk';
+
+// Initialize client
+const client = new CoTrainClient({
+  network: 'testnet',
+  walletPath: '~/.cotrain/wallet.json',
+  apiKey: 'your-api-key'
+});
+
+// Configure training
+const trainingConfig: TrainingConfig = {
+  modelType: 'transformer',
+  modelSize: '7B',
+  dataset: 'custom-dataset',
+  epochs: 10,
+  batchSize: 32,
+  learningRate: 1e-4
+};
+
+const securityConfig: SecurityConfig = {
+  enableByzantineTolerance: true,
+  gradientClipping: true,
+  privacyLevel: 'high',
+  validatorCount: 21
+};
+
+// Submit and monitor training
+async function trainModel() {
+  try {
+    const job = await client.submitTrainingJob({
+      config: trainingConfig,
+      security: securityConfig,
+      maxCostCTN: 1000
+    });
+    
+    console.log(`Training job submitted: ${job.id}`);
+    
+    // Monitor with async iterator
+    for await (const update of client.monitorJob(job.id)) {
+      console.log(`Epoch ${update.epoch}: Loss = ${update.loss.toFixed(4)}`);
+      
+      if (update.status === 'completed') {
+        console.log('Training completed successfully!');
+        break;
+      } else if (update.status === 'failed') {
+        console.log(`Training failed: ${update.error}`);
+        break;
+      }
+    }
+    
+    // Download model
+    const modelPath = await client.downloadModel(job.id, './models/');
+    console.log(`Model downloaded to: ${modelPath}`);
+    
+  } catch (error) {
+    console.error('Training error:', error);
+  }
+}
+
+trainModel();
+```
+
+---
+
+## 🚀 Deployment Guide
+
+### 🌐 Production Deployment
+
+#### **Infrastructure Requirements**
+
+| Component | Minimum | Recommended | Enterprise |
+|-----------|---------|-------------|------------|
+| **CPU** | 8 cores | 16 cores | 32+ cores |
+| **RAM** | 32 GB | 64 GB | 128+ GB |
+| **GPU** | 1x RTX 4090 | 2x RTX 4090 | 4+ H100 |
+| **Storage** | 1 TB SSD | 2 TB NVMe | 10+ TB NVMe |
+| **Network** | 1 Gbps | 10 Gbps | 25+ Gbps |
+| **Bandwidth** | 10 TB/month | 50 TB/month | Unlimited |
+
+#### **Docker Deployment**
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  cotrain-node:
+    image: cotrain/node:latest
+    ports:
+      - "8080:8080"  # API port
+      - "9090:9090"  # P2P port
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ~/.cotrain:/root/.cotrain
+    environment:
+      - COTRAIN_NETWORK=mainnet
+      - COTRAIN_LOG_LEVEL=info
+      - COTRAIN_GPU_ENABLED=true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  cotrain-monitor:
+    image: cotrain/monitor:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - MONITOR_NODE_URL=http://cotrain-node:8080
+    depends_on:
+      - cotrain-node
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+  prometheus-data:
+```
+
+#### **Kubernetes Deployment**
+
+```yaml
+# cotrain-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cotrain-node
+  namespace: cotrain
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cotrain-node
+  template:
+    metadata:
+      labels:
+        app: cotrain-node
+    spec:
+      containers:
+      - name: cotrain-node
+        image: cotrain/node:latest
+        ports:
+        - containerPort: 8080
+        - containerPort: 9090
+        env:
+        - name: COTRAIN_NETWORK
+          value: "mainnet"
+        - name: COTRAIN_LOG_LEVEL
+          value: "info"
+        resources:
+          requests:
+            memory: "16Gi"
+            cpu: "4"
+            nvidia.com/gpu: "1"
+          limits:
+            memory: "32Gi"
+            cpu: "8"
+            nvidia.com/gpu: "1"
+        volumeMounts:
+        - name: cotrain-data
+          mountPath: /app/data
+        - name: cotrain-config
+          mountPath: /app/config
+      volumes:
+      - name: cotrain-data
+        persistentVolumeClaim:
+          claimName: cotrain-data-pvc
+      - name: cotrain-config
+        configMap:
+          name: cotrain-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cotrain-service
+  namespace: cotrain
+spec:
+  selector:
+    app: cotrain-node
+  ports:
+  - name: api
+    port: 8080
+    targetPort: 8080
+  - name: p2p
+    port: 9090
+    targetPort: 9090
+  type: LoadBalancer
+```
+
+### 🔧 Configuration Management
+
+```yaml
+# cotrain-config.yaml
+network:
+  name: "mainnet"
+  rpc_url: "https://fullnode.mainnet.aptoslabs.com/v1"
+  chain_id: 1
+
+node:
+  id: "node-001"
+  region: "us-west-2"
+  gpu_enabled: true
+  max_concurrent_jobs: 4
+  
+security:
+  byzantine_tolerance: true
+  gradient_clipping: true
+  privacy_level: "high"
+  validator_selection: "stake-weighted"
+  
+logging:
+  level: "info"
+  format: "json"
+  output: "/app/logs/cotrain.log"
+  
+metrics:
+  enabled: true
+  port: 9091
+  path: "/metrics"
+  
+api:
+  host: "0.0.0.0"
+  port: 8080
+  cors_enabled: true
+  rate_limit: 1000  # requests per minute
+  
+training:
+  default_timeout: 3600  # seconds
+  max_model_size: "70B"
+  supported_frameworks:
+    - "pytorch"
+    - "tensorflow"
+    - "jax"
+```
+
+---
+
+## 📈 Best Practices
+
+### 🔒 Security Best Practices
+
+1. **Key Management**
+   - Use hardware security modules (HSMs) for production keys
+   - Implement key rotation policies
+   - Never store private keys in code or configuration files
+   - Use environment variables or secure vaults for sensitive data
+
+2. **Network Security**
+   - Enable TLS for all communications
+   - Use VPNs for sensitive operations
+   - Implement proper firewall rules
+   - Monitor network traffic for anomalies
+
+3. **Access Control**
+   - Implement role-based access control (RBAC)
+   - Use multi-factor authentication (MFA)
+   - Regular access reviews and audits
+   - Principle of least privilege
+
+4. **Monitoring & Alerting**
+   - Real-time security monitoring
+   - Automated threat detection
+   - Incident response procedures
+   - Regular security assessments
+
+### ⚡ Performance Optimization
+
+1. **GPU Utilization**
+   - Optimize batch sizes for your hardware
+   - Use mixed precision training when possible
+   - Implement gradient accumulation for large models
+   - Monitor GPU memory usage
+
+2. **Network Optimization**
+   - Use compression for gradient communication
+   - Implement efficient data loading pipelines
+   - Optimize network topology
+   - Use local caching where appropriate
+
+3. **Resource Management**
+   - Implement proper resource quotas
+   - Use auto-scaling for dynamic workloads
+   - Monitor resource utilization
+   - Optimize container resource allocation
+
+### 🧪 Testing Strategies
+
+1. **Unit Testing**
+   - Test individual components in isolation
+   - Mock external dependencies
+   - Achieve high code coverage
+   - Use property-based testing for complex logic
+
+2. **Integration Testing**
+   - Test component interactions
+   - Use test environments that mirror production
+   - Test failure scenarios
+   - Validate end-to-end workflows
+
+3. **Security Testing**
+   - Regular penetration testing
+   - Automated vulnerability scanning
+   - Chaos engineering for resilience
+   - Red team exercises
+
+---
+
+## 🆘 Troubleshooting
+
+### 🐛 Common Issues
+
+#### **Training Job Failures**
+
+**Problem**: Training jobs fail with "Insufficient resources" error
+
+**Solution**:
+```bash
+# Check available resources
+cotrain node status
+
+# Increase resource allocation
+cotrain config set --max-gpu-memory 24GB
+cotrain config set --max-concurrent-jobs 2
+
+# Restart node
+cotrain node restart
+```
+
+**Problem**: Byzantine fault detection triggering false positives
+
+**Solution**:
+```python
+# Adjust sensitivity in config
+security_config = SecurityConfig(
+    byzantine_threshold=0.4,  # Increase threshold
+    gradient_clip_threshold=3.0,  # Increase clipping threshold
+    reputation_decay=0.95  # Slower reputation decay
+)
+```
+
+#### **Network Connectivity Issues**
+
+**Problem**: Node cannot connect to network
+
+**Solution**:
+```bash
+# Check network configuration
+cotrain network status
+
+# Test connectivity
+cotrain network ping --target bootstrap-node.cotrain.ai
+
+# Reset network configuration
+cotrain network reset
+cotrain node restart
+```
+
+#### **Performance Issues**
+
+**Problem**: Slow training performance
+
+**Solution**:
+```bash
+# Profile performance
+cotrain performance profile --duration 300
+
+# Check GPU utilization
+nvidia-smi
+
+# Optimize batch size
+cotrain train optimize --model-config model.yaml
+```
+
+### 📊 Debugging Tools
+
+```python
+# Enable debug logging
+import logging
+logging.getLogger('cotrain').setLevel(logging.DEBUG)
+
+# Performance profiler
+from cotrain.profiler import TrainingProfiler
+
+with TrainingProfiler() as profiler:
+    # Your training code here
+    result = client.submit_training_job(config)
+
+# Generate performance report
+profiler.generate_report('performance_report.html')
+
+# Memory usage tracker
+from cotrain.monitoring import MemoryTracker
+
+tracker = MemoryTracker()
+tracker.start()
+
+# Your code here
+
+tracker.stop()
+tracker.print_summary()
+```
+
+---
+
+## 🔮 Future Roadmap
+
+### 🚀 Upcoming Features
+
+#### **Q1 2025**
+- **Advanced Privacy**: Homomorphic encryption for training data
+- **Cross-chain Integration**: Support for Ethereum and Solana
+- **Mobile SDK**: React Native and Flutter support
+- **Auto-scaling**: Dynamic resource allocation based on demand
+
+#### **Q2 2025**
+- **Federated Learning**: Privacy-preserving collaborative training
+- **Model Marketplace**: Decentralized model sharing and monetization
+- **Edge Computing**: Support for edge devices and IoT
+- **Advanced Analytics**: ML-powered performance optimization
+
+#### **Q3 2025**
+- **Quantum Resistance**: Post-quantum cryptography implementation
+- **AI Governance**: Automated policy enforcement
+- **Global CDN**: Distributed model serving network
+- **Enterprise Features**: Advanced compliance and audit tools
+
+#### **Q4 2025**
+- **AGI Support**: Infrastructure for artificial general intelligence
+- **Space Computing**: Satellite-based training nodes
+- **Carbon Neutral**: 100% renewable energy commitment
+- **Universal Access**: Free tier for educational and research use
+
+---
+
+## 📚 Additional Resources
+
+### 📖 Documentation
+- **[API Reference](/docs/api)** - Complete API documentation
+- **[SDK Guide](/docs/sdk)** - Detailed SDK usage examples
+- **[Security Whitepaper](https://cotrain.ai/security.pdf)** - In-depth security analysis
+- **[Performance Benchmarks](https://cotrain.ai/benchmarks)** - Performance comparisons
+
+### 🎓 Tutorials
+- **[Getting Started Tutorial](/docs/quickstart)** - Your first CoTrain application
+- **[Advanced Training Techniques](https://tutorials.cotrain.ai/advanced)** - Optimization strategies
+- **[Security Best Practices](https://tutorials.cotrain.ai/security)** - Secure development guide
+- **[Deployment Patterns](https://tutorials.cotrain.ai/deployment)** - Production deployment strategies
+
+### 🤝 Community
+- **[Discord](https://discord.gg/cotrain)** - Real-time community chat
+- **[GitHub](https://github.com/cotrain-ai)** - Open source repositories
+- **[Forum](https://forum.cotrain.ai)** - Technical discussions
+- **[Blog](https://blog.cotrain.ai)** - Latest updates and insights
+
+### 🆘 Support
+- **[Help Center](https://help.cotrain.ai)** - Common questions and solutions
+- **[Status Page](https://status.cotrain.ai)** - Network status and incidents
+- **[Bug Reports](https://github.com/cotrain-ai/cotrain/issues)** - Report issues
+- **[Feature Requests](https://feedback.cotrain.ai)** - Suggest improvements
+
+---
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+  <div className="p-6 border rounded-lg">
+    <h3 className="text-lg font-semibold mb-2">🛠️ Start Building</h3>
+    <p className="text-sm text-muted-foreground mb-4">Get started with the CoTrain SDK</p>
+    <a href="/docs/sdk" className="text-blue-600 hover:text-blue-800 font-medium">View SDK Docs →</a>
+  </div>
+  <div className="p-6 border rounded-lg">
+    <h3 className="text-lg font-semibold mb-2">🔒 Security Guide</h3>
+    <p className="text-sm text-muted-foreground mb-4">Learn about our security mechanisms</p>
+    <a href="https://cotrain.ai/security.pdf" className="text-blue-600 hover:text-blue-800 font-medium">Read Whitepaper →</a>
+  </div>
+  <div className="p-6 border rounded-lg">
+    <h3 className="text-lg font-semibold mb-2">🤝 Join Community</h3>
+    <p className="text-sm text-muted-foreground mb-4">Connect with other developers</p>
+    <a href="https://discord.gg/cotrain" className="text-blue-600 hover:text-blue-800 font-medium">Join Discord →</a>
+  </div>
+</div>
+
+[Explore the SDK →](/docs/sdk) • [View API Reference →](/docs/api) • [Check Tokenomics →](/docs/tokenomics)
